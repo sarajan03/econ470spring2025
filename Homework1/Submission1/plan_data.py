@@ -2,7 +2,7 @@ import pandas as pd
 
 import os 
 ma_path = (f'/Users/sushmitarajan/econ470spring2025/Homework1/Data/input/CPSC_Contract_Info_2015_01.csv')
-contract_info = pd.read_csv(ma_path, encoding="ISO-8859-1", skiprows=1, names=[ "contractid", "planid", "org_type", "plan_type", "partd", "snp", "eghp", "org_name", "org_marketing_name", "plan_name", "parent_org", "contract_date"], dtype= {
+contract_info = pd.read_csv(ma_path, encoding="latin1", skiprows=1, names=[ "contractid", "planid", "org_type", "plan_type", "partd", "snp", "eghp", "org_name", "org_marketing_name", "plan_name", "parent_org", "contract_date"], dtype= {
                 "contractid": str,
                 "planid": float,
                 "org_type": str,
@@ -41,7 +41,7 @@ enroll_info
 # Merge contract info with enrollment info
 plan_data = contract_info.merge(enroll_info, on=["contractid", "planid"], how="left")
 plan_data
-plan_data["year"] = 2015
+plan_data["year"] = y 
 # Fill missing fips codes by state and county
 plan_data.sort_values(by=["state", "county"], inplace=True)
 plan_data["fips"] = plan_data.groupby(["state", "county"])["fips"].fillna(method="ffill").fillna(method="bfill")
