@@ -43,4 +43,3 @@ enrollment_per_type = final_ma_data.pivot_table(
 )
 
  
-print(enrollment_per_type)

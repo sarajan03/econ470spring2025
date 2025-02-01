@@ -1,16 +1,13 @@
 ---
 title: "Homework 1"
-subtitle: "Research Methods, Spring 2025"
-author: "Answer Key"
+
+author: "Sushmita Rajan"
 format:
   pdf:
-    output-file: "mccarthy-i-hwk1-1"
+    output-file: "rajan-hwk-1"
     output-ext:  "pdf"
-    header-includes:
-      - \usepackage{float}
-      - \floatplacement{table}{H}
 jupyter:
-  python: /Users/sushmitarajan/econ470spring2025/Homework1/Submission2/analysis/hwk-1-analysis.py
+  python:   python3    /Users/sushmitarajan/Library/Jupyter/kernels/python3
 ---
 
 ```{python echo=True}
