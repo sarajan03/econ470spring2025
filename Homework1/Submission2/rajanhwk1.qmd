@@ -4,17 +4,13 @@ title: "Homework 1"
 author: "Sushmita Rajan"
 format:
   pdf:
-    output-file: "rajan-hwk1-2"
+    output-file: "rajan-hwk1-2"quarto check jupyter /
     output-exit: "pdf"
     code-fold: true
     highlight-style: github
 
 jupyter: python3
-jupyter: 
-  python: myenv
-  display_name: "Python 3"
 ---
-
 ```{python echo=True}
 #| include: false
 
@@ -26,7 +22,7 @@ import numpy as np
 
 ```{python echo=True}
 #| include: false
-with open("/Users/sushmitarajan/econ470spring2025/Homework1/Submission2/analysis/hwk-1-analysis.py") as file:
+with open("/Users/sushmitarajan/econ470spring2025/Homework1/Submission2/analysis/hwk1-analysis.ipnyb") as file:
     exec(file.read())
 
 # My answers to the homework questions are described below. The GitHub repository for this work is available 
