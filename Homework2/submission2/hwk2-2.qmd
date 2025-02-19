@@ -1,0 +1,51 @@
+---
+title: "Homework 2"
+author: "Sushmita Rajan"
+format:
+  pdf:
+    output-file: "rajan_hwk2_s2"
+    output-ext:  "pdf"
+    header-includes:
+      - \usepackage{float}
+      - \floatplacement{table}{H}
+---
+```{r}
+#| include: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, fixest,
+               scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
+               ggrepel, survey, foreign, devtools, pdftools, kableExtra, modelsummary,
+               kableExtra)
+```
+# Homework 2
+
+[Click here to view my repository](https://github.com/sarajan03/econ470spring2025/tree/main/Homework2)
+
+
+\newpage 
+
+---
+```{r}
+#| include: false
+#| eval: true
+
+load("/Users/sushmitarajan/econ470spring2025/Homework2/submission2/results/Hwk2_workspace.RData") 
+```
+
+\noindent 1. How many hospitals filed more than one report in the same year? Show your answer as a line graph of the number of hospitals over time. 
+
+
+```{r} 
+#| echo: false
+#| label: tbl-plans
+#| tbl-cap: Multiple reports
+ggplot(multi_report_counts, aes(x = fyear, y = num_hospitals)) +
+geom_line(color = "blue", linewidth = 2) +
+labs(
+title = "Hospitals that filed multiple reports",
+x = "Year",
+y = "Number of Hospitals",
+) +
+theme_minimal()
+```
