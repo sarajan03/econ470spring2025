@@ -1,0 +1,179 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Homework 1\"\n",
+        "\n",
+        "author: \"Sushmita Rajan\"\n",
+        "\n",
+        "format:\n",
+        "  pdf:\n",
+        "    output-file: \"rajan-hwk1-2\"\n",
+        "    code-fold: true\n",
+        "execute:\n",
+        "  python:\n",
+        "    kernel: /usr/local/bin/python3\n",
+        "\n",
+        "---"
+      ],
+      "id": "d5e5d4d0"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| include: false\n",
+        "\n",
+        "# Import necessary packages\n",
+        "import pandas as pd\n",
+        "import numpy as np"
+      ],
+      "id": "97772fd0",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| include: false\n",
+        "with open(\"/Users/sushmitarajan/econ470spring2025/Homework1/Submission2/analysis/hwk-1-analysis.py\") as file:\n",
+        "    exec(file.read())\n",
+        "\n",
+        "# My answers to the homework questions are described below. The GitHub repository for this work is available \n",
+        "#[here](https://github.com/sarajan03/econ470spring2025/tree/main/Homework1/Submission2).\n",
+        "\n",
+        "# My file did not want to download as a pdf so have to use a html to download as pdf"
+      ],
+      "id": "d8f5cddc",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "\\newpage\n",
+        "# Building the Data\n",
+        "Answer the following based on our initial, simplified dataset of enrollments, plan types, and service areas:\n",
+        "\n",
+        "\\noindent 1. Provide a table of the count of plans under each plan type in each year.<br>\n",
+        "\n",
+        "See @tbl-plans.\n"
+      ],
+      "id": "ace11141"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| echo: false\n",
+        "#| label: tbl-plans\n",
+        "#| tbl-cap: All plan types in 2015\n",
+        "\n",
+        "# Sort the pivot table by the sum of the counts across all years (descending)\n",
+        "plans_per_type_sorted = plans_per_type.loc[plans_per_type.sum(axis=1).sort_values(ascending=False).index]\n",
+        "\n",
+        "# Rename columns for clarity, such as 'Plan Type' for the index column and 'Year' for the year columns\n",
+        "plans_per_type_sorted.index.name = 'Plan Type'  # Label for the index (rows)\n",
+        "\n",
+        "# Format the table with commas in counts for readability\n",
+        "plans_per_type_sorted = plans_per_type_sorted.style.format(\"{:,}\")\n",
+        "\n",
+        "# Display the formatted table\n",
+        "plans_per_type_sorted"
+      ],
+      "id": "tbl-plans",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "\\newpage\n",
+        "\\noindent 2. Remove all special needs plans (SNP), employer group plans (eghp), and all \"800-series\" plans. Provide an updated table after making these exclusions.\n",
+        "\n",
+        "I remove the relevant plans just by applying the relevant filter to the full ma data and then creating the table of plan types. Counts of different plan types with these exclusions are presented in @tbl-plans2.\n"
+      ],
+      "id": "74e8c69d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| echo: false\n",
+        "#| label: tbl-plans2\n",
+        "#| tbl-cap: Revised plan types in 2015\n",
+        "\n",
+        "# Sort the pivot table by the sum of the counts across all years (descending)\n",
+        "plans_per_type2_sorted = plans_per_type2.loc[plans_per_type2.sum(axis=1).sort_values(ascending=False).index]\n",
+        "\n",
+        "# Rename columns for clarity, such as 'Plan Type' for the index column and 'Year' for the year columns\n",
+        "plans_per_type2_sorted.index.name = 'Plan Type'  # Label for the index (rows)\n",
+        "\n",
+        "# Format the table with commas in counts for readability\n",
+        "plans_per_type2_sorted = plans_per_type2_sorted.style.format(\"{:,}\")\n",
+        "\n",
+        "# Display the formatted table\n",
+        "plans_per_type2_sorted"
+      ],
+      "id": "tbl-plans2",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "\\newpage\n",
+        "\\noindent 3. Provide a table of the average enrollments for each plan type in 2015.\n",
+        "\n",
+        "To do this, I need to collapse the data to the plan-type level and form the average enrollments across all counties in which that plan type operates. The resulting table is presented in @tbl-enroll.\n"
+      ],
+      "id": "8a1352b3"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| echo: false\n",
+        "#| label: tbl-enroll\n",
+        "#| tbl-cap: Enrollments by plan type in 2015\n",
+        "\n",
+        "# Sort the enrollment_per_type table by 'count' in descending order\n",
+        "enrollment_per_type_sorted = enrollment_per_type.sort_values(by='count', ascending=False)\n",
+        "\n",
+        "# Rename the index for clarity if needed\n",
+        "enrollment_per_type_sorted.index.name = 'Plan Type'\n",
+        "enrollment_per_type_sorted = enrollment_per_type_sorted.rename(columns={'mean': 'Average Enrollment'})\n",
+        "enrollment_per_type_sorted = enrollment_per_type_sorted.rename(columns={'count': 'Count'})\n",
+        "\n",
+        "# Format the table with commas for readability in both count and mean\n",
+        "enrollment_per_type_sorted = enrollment_per_type_sorted.style.format({\n",
+        "    'count': \"{:,}\",\n",
+        "    'mean': \"{:,.2f}\"  # Format mean to show two decimal places\n",
+        "})\n",
+        "\n",
+        "# Display the formatted table\n",
+        "enrollment_per_type_sorted"
+      ],
+      "id": "tbl-enroll",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Library/Frameworks/Python.framework/Versions/3.11/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

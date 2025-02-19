@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 import os 
 ma_path = (f'/Users/sushmitarajan/econ470spring2025/Homework1/Data/input/CPSC_Contract_Info_2015_01.csv')
 contract_info = pd.read_csv(ma_path, encoding="latin1", skiprows=1, names=[ "contractid", "planid", "org_type", "plan_type", "partd", "snp", "eghp", "org_name", "org_marketing_name", "plan_name", "parent_org", "contract_date"], dtype= {
