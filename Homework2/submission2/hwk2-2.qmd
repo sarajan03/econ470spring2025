@@ -40,12 +40,50 @@ load("/Users/sushmitarajan/econ470spring2025/Homework2/submission2/results/Hwk2_
 #| echo: false
 #| label: tbl-plans
 #| tbl-cap: Multiple reports
-ggplot(multi_report_counts, aes(x = fyear, y = num_hospitals)) +
-geom_line(color = "blue", linewidth = 2) +
-labs(
-title = "Hospitals that filed multiple reports",
-x = "Year",
-y = "Number of Hospitals",
-) +
-theme_minimal()
+ggplot(streets_with_multiple_reports, aes(x = year, y = num_streets)) +
+  geom_line(color = "pink", size = 2) +
+  geom_point(color = "hotpink", size = 2) +
+  labs(title = "Number of Hospitals Filing More Than One Report Per Year",
+       x = "Year",
+       y = "Hospital Count") +
+  theme_minimal()
+```
+
+\newpage 
+\noindent 2. After removing/combining multiple reports, how many unique hospital IDs (Medicare provider numbers) exist in the data?
+
+```{r} 
+
+library(scales)
+library(ggplot2)
+
+# Violin Plot for Total Charges Distribution (Updated)
+ggplot(final.hcris.data, aes(x = as.factor(year), y = tot_charges)) + 
+  # Generate the violin plot with customized fill and outline colors
+  geom_violin(fill = "#8A2BE2", color = "#006400", alpha = 0.75) +  # Violet fill and dark green outline
+
+  # Apply a log scale to the y-axis and format labels with commas for readability
+  scale_y_log10(
+    labels = label_comma(scale = 1, accuracy = 0.1)  # Adjusting accuracy for clearer labels
+  ) + 
+  
+  # Add titles, axis labels, and caption with a more descriptive text
+  labs(
+    title = "Distribution of Total Charges Over the Years",
+    x = "Year of Report",
+    y = "Log of Total Charges",
+    caption = "Data Source: HCRIS (Medicare/Medicaid)"
+  ) +
+  
+  # Minimal theme for better aesthetics
+  theme_minimal() +
+  
+  # Adjust the x-axis labels to be angled for better visibility
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),  # Rotate x-axis labels
+    axis.title.x = element_text(size = 14),  # Increase font size for x-axis title
+    axis.title.y = element_text(size = 14),  # Increase font size for y-axis title
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center-align and increase font size of the title
+    plot.caption = element_text(size = 10)  # Adjusting font size for the caption
+  )
 ```
