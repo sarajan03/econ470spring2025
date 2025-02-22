@@ -1,0 +1,150 @@
+---
+title: "Homework 2"
+author: "Sushmita Rajan"
+format:
+  pdf:
+    output-file: "rajan_hwk2_s3"
+    output-ext:  "pdf"
+    header-includes:
+      - \usepackage{float}
+      - \floatplacement{table}{H}
+---
+```{r}
+#| include: false
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, fixest,
+               scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
+               ggrepel, survey, foreign, devtools, pdftools, kableExtra, modelsummary,
+               kableExtra)
+```
+# Homework 2
+
+[Click here to view my repository](https://github.com/sarajan03/econ470spring2025/tree/main/Homework2)
+
+\newpage 
+
+---
+```{r}
+#| include: false
+#| eval: true
+
+load("/Users/sushmitarajan/econ470spring2025/Homework2/submission3/results/Hwk2_workspace.RData") 
+```
+
+\noindent 1. How many hospitals filed more than one report in the same year? Show your answer as a line graph of the number of hospitals over time. 
+
+```{r} 
+#| echo: false
+#| label: fig-multiple-reports
+
+ggplot(streets_with_multiple_reports, aes(x = year, y = num_streets)) +
+  geom_line(color = "pink", size = 2) +
+  geom_point(color = "hotpink", size = 2) +
+  labs(title = "Number of Hospitals Filing More Than One Report Per Year",
+       x = "Year",
+       y = "Hospital Count") +
+  theme_minimal()
+```
+
+\newpage 
+\noindent 2. After removing/combining multiple reports, how many unique hospital IDs (Medicare provider numbers) exist in the data?
+
+```{r} 
+#| echo: false
+#| label: fig-unique-hospitals
+
+q2_ggplot <- ggplot(count_per_year, aes(x = year, y = unique_hospitals)) +
+  geom_line(color = "purple", size = 2) +
+  geom_point(color ='red', size = 2) +
+  labs(title = "Number of Unique Hospital IDs Per Year",
+       x = "Year",
+       y = "Count of Unique Provider Numbers") +
+  theme_minimal()
+print(q2_ggplot)
+```
+
+\newpage 
+\noindent 3. What is the distribution of total charges (tot_charges in the data) in each year? 
+
+```{r} 
+#| echo: false
+#| label: fig-total-charges
+q3_ggplot <- ggplot(filtered_data, aes(x = as.factor(year), y = tot_charges)) +
+  geom_violin(fill = "#8A2BE2", color = "#006400", alpha = 0.75, adjust = 1) +
+  scale_y_log10() +
+  labs(title = "Distribution of Total Charges Over the Years",
+       x = "Year of Report",
+       y = "Log of Total Charges",
+       caption = "Data Source: HCRIS (Medicare/Medicaid) | Outliers (Top & Bottom 1%) Removed") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(q3_ggplot)
+```
+
+\newpage 
+\noindent 4. What is the distribution of estimated prices in each year? 
+
+
+```{r} 
+#| echo: false
+#| label: fig-estimated-prices
+
+q4_ggplot <- ggplot(price_data, aes(x = as.factor(year), y = price)) +
+  geom_violin(trim = TRUE, fill = "#8A2BE2", color = "blue", scale = "width") +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
+  labs(title = "Distribution of Estimated Prices by Year",
+       x = "Year",
+       y = "Estimated Prices") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(q4_ggplot)
+```
+
+
+
+\noindent 5. Calculate the average price among penalized versus non-penalized hospitals.
+
+```{r} 
+#| echo: false
+#| label: tbl-avg-price
+
+mean_penalized <- round(mean(hcris_2012$price[hcris_2012$penalty == TRUE], na.rm = TRUE), 2)
+mean_non_penalized <- round(mean(hcris_2012$price[hcris_2012$penalty == FALSE], na.rm = TRUE), 2)
+```
+
+The mean price for penalized hospitals is `r mean_penalized`, and the mean price for non-penalized hospitals is `r mean_non_penalized`.
+
+\newpage 
+\noindent 6. Calculate the average price among penalized versus non-penalized hospitals.
+
+```{r} 
+#| echo: false
+
+knitr::kable(hcris_q6, 
+             caption = "Summary of Prices for Penalized and Non-Penalized Hospitals", 
+             col.names = c("Bed Quartile", "No Penalty", "Penalty"))
+
+```
+
+\noindent 7. Find the average treatment effect using each of the following estimators, and present your results in a single table:
+```{r} 
+#| echo: false
+knitr::kable(ate_estimates, 
+             caption = "ATE Estimates from Different Methods", 
+             col.names = c("Method", "ATE Estimate"))
+
+
+```
+
+\noindent 8. Are the results similar, identical, or very different?
+
+The treatment effect estimators produced very similar results, with each estimator yielding identical average treatment effect (ATE) coefficients.
+
+\noindent 9. Do you think you’ve estimated a causal effect of the penalty? Why or why not?
+
+No, because the analysis only controlled for bed size, but many other factors could influence hospital prices. Variables such as patient characteristics, which can vary across hospitals, were not considered, making it unlikely that we’ve isolated the true causal effect of the penalty.
+
+\noindent 10. Briefly describe your experience working with these data. Tell me one thing you learned and one thing that really aggravated or surprised you.
+
+Working with these data was challenging, as hospital price data is rarely represented as a single figure. I struggled with knowing whether I was approaching the right or wrong answer when running the code. One key takeaway was learning about the complexities of hospital pricing, but it was frustrating not knowing how accurate my results were, given the data's intricacies.
