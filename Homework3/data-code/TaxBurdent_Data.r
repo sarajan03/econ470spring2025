@@ -50,7 +50,7 @@ cpi.data <- cpi.data %>%
 # adjust to 2010 dollars
 final.data <- final.data %>%
   left_join(cpi.data, by="Year") %>%
-  mutate(price_cpi=cost_per_pack*(218/index))
+  mutate(price_cpi=cost_per_pack*(230/index))
 
 
 write_tsv(final.data,"/Users/sushmitarajan/econ470spring2025/Homework3/data/output/TaxBurden_Data.txt",append=FALSE,col_names=TRUE)
