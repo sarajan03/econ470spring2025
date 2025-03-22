@@ -1,223 +1,244 @@
 ---
-title: "rajan_hwk3_s2"
+title: "Homework 3"
+subtitle: "Research Methods, Spring 2025"
+author: "Sushmita Rajan"
 format:
   pdf:
-    output-file: "rajan_hwk3_2"
+    output-file: "rajan_hwk3_3"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
       - \floatplacement{table}{H}
-date: "2025-02-24"
-
 ---
 ```{r}
 #| include: false
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest, modelsummary, kableExtra )
-
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest, broom, kableExtra)
 load("/Users/sushmitarajan/econ470spring2025/Homework3/submission2/results/Hwk3_workspace.RData") 
 
 ```
 
-[Click here to view my repository](https://github.com/sarajan03/econ470spring2025/tree/main/Homework3)
-
-
-1. Present a bar graph showing the proportion of states with a change in their cigarette tax in each year from 1970 to 1985.
+<div style="text-align: center;">
+  [Click here to view my repository](https://github.com/sarajan03/econ470spring2025/tree/main/Homework3)
+</div>
+\newpage
+\noindent 1. Present a bar graph showing the proportion of states with a change in their cigarette tax in each year from 1970 to 1985.
 ```{r}
 #| echo: false
-#| label: Proportion of States with a change in their cigarette tax in each 
-print(question1) 
+#| label: question1
+#| fig-cap: Proportion of states with tax change
+
+question1
 ```
 
-
-2. Plot on a single graph the average tax (in 2012 dollars) on cigarettes and the average price of a pack of cigarettes from 1970 to 2018.
+\newpage
+\noindent 2. Plot on a single graph the average tax (in 2012 dollars) on cigarettes and the average price of a pack of cigarettes from 1970 to 2018.
 ```{r}
 #| echo: false
+#| label: question2
+#| fig-cap: 1970-2018 Average Tax
 question2
-
 ```
 
+\newpage
+\noindent 3. Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
 
-3. Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
+The states with the highest increases in cigarette prices are
+`r paste(top_states$state, collapse = ", ")`
+
 ```{r}
 #| echo: false
-
-price_change <- tax_burden_final %>%
-  group_by(state) %>%
-  filter(Year == 1970 | Year == 2018) %>%
-  summarise(price_change = cost_per_pack[Year == 2018] - cost_per_pack[Year == 1970])
-
-top_states <- price_change %>%
-  arrange(desc(price_change)) %>%
-  head(5)
-
-print(paste("States with the highest increases in cigarette prices:", paste(top_states$state, collapse = ", ")))
-
-
-top_states_final <- tax_burden_final %>%
-  filter(state %in% top_states$state)
-
-
-ggplot(top_states_final, aes(x = Year, y = sales_per_capita, color = state)) +
-  geom_line(size = 1) +
-  labs(
-    title = "Average Number of Packs Sold per Capita for the Top 5 States with the Highest Price Increase (1970-2018)",
-    x = "Year",
-    y = "Packs Sold per Capita",
-    color = "State"
-  ) +
-  theme_minimal()
+#| label: question3
+#| fig-cap: Highest Cigarette Price Increase States 
+question3
 ```
+\newpage
+\noindent 4. Identify the 5 states with the lowest increases in cigarette prices over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
 
-4. Identify the 5 states with the lowest increases in cigarette prices over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
+The states with the lowest increases in cigarette prices are
+`r paste(low_states$state, collapse = ", ")`
 ```{r}
 #| echo: false
+#| label: question4
+#| fig-cap: Lowest Cigarette Price Increase States 
 
-low_states <- price_change %>%
-  arrange(price_change) %>%
-  head(5)
-
-print(paste("States with the lowest increases in cigarette prices:", paste(low_states$state, collapse = ", ")))
-
-low_states_final <- tax_burden_final %>%
-  filter(state %in% low_states$state)
-
-
-ggplot(low_states_final, aes(x = Year, y = sales_per_capita, color = state)) +
-  geom_line(size = 1) +
-  labs(
-    title = "Average Number of Packs Sold per Capita for the Top 5 States with the Highest Price Increase (1970-2018)",
-    x = "Year",
-    y = "Packs Sold per Capita",
-    color = "State"
-  ) +
-  theme_minimal()
-
+question4
 ```
 
-5. Compare the trends in sales from the 5 states with the highest price increases to those with the lowest price increases.
+\newpage
+\noindent 5. Compare the trends in sales from the 5 states with the highest price increases to those with the lowest price increases.
 ```{r}
 #| echo: false
+#| label: question5
+#| fig-cap: Comparison of Highest and Lowest Cigarret Price Increases
 
-#Combine both datasets for plotting
-high_low_combined <- bind_rows(
-  top_states_final %>% mutate(group = "Top 5 States (Highest Price Increase)"),
-  low_states_final %>% mutate(group = "Top 5 States (Lowest Price Increase)")
-)
-
-# Compute average sales per capita for both groups
-high_low_avg <- high_low_combined %>%
-  group_by(Year, group) %>%
-  summarise(avg_sales_per_capita = mean(sales_per_capita, na.rm = TRUE))
-
-# Plot the averaged trends for the two groups
-ggplot(high_low_avg, aes(x = Year, y = avg_sales_per_capita, color = group)) +
-  geom_line(size = 1.2) +
-  labs(
-    title = "Average Cigarette Sales per Capita: Highest vs. Lowest Price Increases (1970-2018)",
-    x = "Year",
-    y = "Average Packs Sold per Capita",
-    color = "Group"
-  ) +
-  theme_minimal() +
-  theme(legend.position = "top",
-        axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
-
-
-## The amount of cigarettes sold in both the highest and lowest states has drastically decreased because of the cultural shifts when it comes to smoking. Missouri and North Dakota seem to pull the lower states average of cost per pack sold up a bit but currently 50 packs sold per capita is seen for both the high and low states. The low states have more variability in packs sold in over the years with north carolina going up to about 250 packs sold per capita around 1975.
+question5
 ```
 
-6. Focusing only on the time period from 1970 to 1990, regress log sales on log prices to estimate the price elasticity of demand over that period. Interpret your results.
+The number of cigarettes sold in both the highest and lowest states has significantly decreased due to cultural shifts in smoking habits. In states with the highest price increases, there is generally a lower number of packs sold per capita.
+
+\newpage
+
+\noindent 6. Focusing only on the time period from 1970 to 1990, regress log sales on log prices to estimate the price elasticity of demand over that period. Interpret your results.
 ```{r}
-modelsummary(ols.1, output = "markdown")
+#| echo: false
+#| label: question6
+tidy(ols.1) %>%
+  filter(term %in% c("ln_price_cpi")) %>%  
+  mutate(term = case_when(   # Rename Intercept
+    term == "ln_price_cpi" ~ "Log Price",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1970-1990 OLS Regression")  %>%
+  kable_styling(position = "center")
+
+
 ```
 
-7. Again limiting to 1970 to 1990, regress log sales on log prices using the total (federal and state) cigarette tax (in dollars) as an instrument for log prices. Interpret your results and compare your estimates to those without an instrument. Are they different? If so, why?
+A price elasticity of demand of -0.809 indicates that cigarette demand is inelastic during the period from 1970 to 1990. For every 1% increase in price, the quantity demanded decreases by about 0.81%, suggesting that cigarette consumption is relatively insensitive to price changes, likely due to the addictive nature of smoking.
+
+\newpage
+\noindent 7. Again limiting to 1970 to 1990, regress log sales on log prices using the total (federal and state) cigarette tax (in dollars) as an instrument for log prices. Interpret your results and compare your estimates to those without an instrument. Are they different? If so, why?
 ```{r}
-modelsummary(ivs.1, output = "markdown")
-```
+#| echo: false
+#| label: question7
 
-8. Show the first stage and reduced-form results from the instrument.
+tidy(ivs.1) %>%
+  filter(term %in% c("fit_ln_price_cpi")) %>%  
+  mutate(term = case_when(
+    term == "fit_ln_price_cpi" ~ "Log Price",  # Use correct case_when() syntax
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1970-1990 IV Regression") %>%
+  kable_styling(position = "center")
+
+```
+The IV (Instrumental Variables) regression, the estimate for the price elasticity of demand is -0.796. The price elasticity of demand for cigarettes from both the OLS and IV regressions is quite similar, indicating inelastic demand. The IV estimate is marginally smaller in absolute value, but the difference is not large enough to suggest that endogeneity was a major concern in this case. Therefore, both approaches give relatively consistent estimates, with the IV method ensuring that any potential biases in the OLS model are addressed.
+
+\newpage
+\noindent 8.Show the first stage and reduced-form results from the instrument.
 
 First Stage:
 ```{r}
-modelsummary(first_stage.1, output = "markdown")
+#| echo: false
+#| label: question8_1
 
+tidy(first_stage.1) %>%
+  filter(term %in% c("ln_total_tax")) %>%  
+  mutate(term = case_when(
+    term == "ln_total_tax" ~ "Log Tax",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1970-1990 First Stage Regression") %>%
+  kable_styling(position = "center")
 ```
 
 Reduced Form:
 ```{r}
-modelsummary(reduced.1, output = "markdown")
+#| echo: false
+#| label: question8_2
 
+tidy(reduced.1) %>%
+  filter(term %in% c("ln_total_tax")) %>%  
+  mutate(term = case_when(
+    term == "ln_total_tax" ~ "Log Tax",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1970-1990 Reduced Form Regression") %>%
+  kable_styling(position = "center")
 ```
 
-9. Repeat questions 1-3 focusing on the period from 1991 to 2015.
+\newpage
+\noindent 9. Repeat questions 1-3 focusing on the period from 1991 to 2015.
 
 OLS Regression:
 ```{r}
-modelsummary(ols.2, output = "markdown")
+#| echo: false
+#| label: question9_1
+
+tidy(ols.2) %>%
+  filter(term %in% c("ln_price_cpi")) %>%  
+  mutate(term = case_when(
+    term == "ln_price_cpi" ~ "Log Price",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1991-2015 OLS Regression") %>%
+  kable_styling(position = "center")
 ```
+
+The OLS estimate for the price elasticity of demand is -0.997, which is close to -1.0, indicating relatively elastic demand. For every 1% increase in price, the quantity demanded decreases by about 1%. This suggests that consumers are more responsive to price changes compared to the earlier period (1970-1990), likely due to factors like health awareness and tobacco taxes.
 
 IV Regression:
 ```{r}
-modelsummary(ivs.2, output = "markdown")
+#| echo: false
+#| label: question9_2
+
+tidy(ivs.2) %>%
+  filter(term %in% c("fit_ln_price_cpi")) %>%  
+  mutate(term = case_when(
+    term == "ln_price_cpi" ~ "Log Price",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), , caption = "1991-2015 IV Regression") %>%
+  kable_styling(position = "center")
 ```
+
+The IV estimate for the price elasticity is -1.15, which is more elastic than the OLS estimate. This means that for every 1% increase in price, the quantity demanded decreases by about 1.15%. The IV approach addresses potential endogeneity issues, ensuring that the estimate reflects the true relationship between price and demand.
+
+The IV estimate is more elastic than the OLS estimate by about 0.15. This suggests that the OLS estimate may have been biased by endogeneity, such as reverse causality or omitted variables. The IV regression corrects for this bias, providing a more accurate measure of price elasticity.
 
 
 First Stage:
 ```{r}
-modelsummary(first_stage.2, output = "markdown")
+#| echo: false
+#| label: question9_3
+
+tidy(first_stage.2) %>%
+  filter(term %in% c("ln_total_tax")) %>%  
+  mutate(term = case_when(
+    term == "ln_total_tax" ~ "Log Tax",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1991-2015 First Stage Regression") %>%
+  kable_styling(position = "center")
+
+
 
 ```
 
 Reduced Form:
 ```{r}
-modelsummary(reduced.2, output = "markdown")
+#| echo: false
+#| label: question9_4
+
+tidy(reduced.2) %>%
+  filter(term %in% c("ln_total_tax")) %>%  
+  mutate(term = case_when(
+    term == "ln_total_tax" ~ "Log Tax",
+    TRUE ~ term
+  )) %>%
+  select(term, estimate, std.error) %>%
+  kable("latex", booktabs = TRUE, col.names = c("Term", "Estimate", "Std. Error"), caption = "1991-2015 Reduced Form Regression") %>%
+  kable_styling(position = "center")
 
 ```
 
-Estimates from Questions 6-9
-```{r}
-#| echo: false
+\newpage
+\noindent 10. Compare your elasticity estimates from 1970-1990 versus those from 1991-2015. Are they different? If so, why?
 
-f <- function(x) format(x, digits = 2, big.mark = ",", format = "f")
+The elasticity estimates for cigarette demand differ significantly between the two periods. From 1970-1990, the OLS estimate was -0.81, indicating inelastic demand, where consumption was relatively unresponsive to price changes. In contrast, from 1991-2015, the OLS estimate rose to -0.997, and the IV estimate was even more elastic at -1.15, indicating more elastic demand. This shift shows that the Local Average Treatment Effect (LATE) is reflected in the increased price sensitivity during the later period. The change in elasticity can be attributed to cultural shifts, including heightened awareness of smoking's health risks, stronger anti-smoking campaigns, and stricter regulations, which made consumers more responsive to price increases. This suggests that the price changes had a greater impact on certain groups during 1991-2015, highlighting the influence of these cultural changes on cigarette demand.
 
-modelsummary(
-  list(
-    "Estimates" = list(
-      "OLS" = ols.1,
-      "IV" = ivs.1,
-      "OLS" = ols.2,
-      "IV" = ivs.2
-    ),
-    "Reduced Form" = list(
-      "IV" = reduced.1,
-      "IV" = reduced.2
-    ),
-    "First Stage" = list(
-      "IV" = first_stage.1,
-      "IV" = first_stage.2
-    )
-  ),
-  shape = 'rbind',
-  coef_map = c(
-    'ln_price_cpi' = "Log Price",  
-    'ln_total_tax' = "Log Tax",
-    'fit_ln_price_cpi' = "Log Price"
-  ),
-  gof_map = list(
-    list(raw = "nobs", clean = "N", fmt = f)
-  ),
-  output = 'kableExtra',
-  escape = FALSE # Prevents the automatic conversion of spaces to &nbsp;
-) %>%
-  add_header_above(c(" "=1, "1970-1990"=2, "1991-2015"=2)) %>%  # Add custom header
-  kable_styling(latex_options = "hold_position")  # Apply styling options
-``` 
 
-10. Compare your elasticity estimates from 1970-1990 versus those from 1991-2015. Are they different? If so, why?
 
-1970-1990 shows a positive elasticity (i.e., price increase leads to more sales), which is unusual for most markets but could be explained by certain market factors like tax increases, changes in policy (e.g., tobacco taxation), or other structural shifts. For instance, if a tax increase made the product appear more "exclusive" or "prestigious," people might have bought more despite the higher price.
 
-1991-2015 shows the more typical negative elasticity, where higher prices are associated with lower sales. This is consistent with standard economic theory and consumer behavior, where higher prices lead to a reduction in demand.
+
+
+
 

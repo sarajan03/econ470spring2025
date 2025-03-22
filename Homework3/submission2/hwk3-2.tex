@@ -166,8 +166,6 @@
     ]}
   
 \KOMAoption{captions}{tableheading}
-\usepackage{float}
-\floatplacement{table}{H}
 \makeatletter
 \@ifpackageloaded{caption}{}{\usepackage{caption}}
 \AtBeginDocument{%
@@ -225,8 +223,15 @@
 
 
 \title{rajan\_hwk3\_s2}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{% add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+}
+\makeatother
+\subtitle{Research Methods, Spring 2025}
 \author{}
-\date{2025-02-24}
+\date{}
 
 \begin{document}
 \maketitle
@@ -245,6 +250,8 @@ here to view my repository}
 
 \pandocbounded{\includegraphics[keepaspectratio]{hwk3-2_files/figure-pdf/Proportion of States with a change in their cigarette tax in each-1.pdf}}
 
+\newpage
+
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \setcounter{enumi}{1}
@@ -256,6 +263,8 @@ here to view my repository}
 
 \pandocbounded{\includegraphics[keepaspectratio]{hwk3-2_files/figure-pdf/unnamed-chunk-3-1.pdf}}
 
+\newpage
+
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \setcounter{enumi}{2}
@@ -265,6 +274,11 @@ here to view my repository}
   (in dollars) over the time period. Plot the average number of packs
   sold per capita for those states from 1970 to 2018.
 \end{enumerate}
+
+The states with the highest increases in cigarette prices are:
+
+States with the highest increases in cigarette prices: New York,
+District of Columbia, Connecticut, Rhode Island, Massachusetts
 
 \begin{verbatim}
 [1] "States with the highest increases in cigarette prices: New York, District of Columbia, Connecticut, Rhode Island, Massachusetts"
@@ -277,15 +291,16 @@ i Please use `linewidth` instead.
 
 \pandocbounded{\includegraphics[keepaspectratio]{hwk3-2_files/figure-pdf/unnamed-chunk-4-1.pdf}}
 
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\setcounter{enumi}{3}
-\tightlist
-\item
-  Identify the 5 states with the lowest increases in cigarette prices
-  over the time period. Plot the average number of packs sold per capita
-  for those states from 1970 to 2018.
-\end{enumerate}
+\newpage
+4
+
+. Identify the 5 states with the lowest increases in cigarette prices
+over the time period. Plot the average number of packs sold per capita
+for those states from 1970 to 2018.
+
+The states with the lowest increases in cigarette prices are:
+
+\texttt{r(low\_states\$state,\ collapse\ =\ ",\ "))}
 
 \begin{verbatim}
 [1] "States with the lowest increases in cigarette prices: Missouri, North Dakota, Tennessee, Georgia, North Carolina"

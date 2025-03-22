@@ -1,17 +1,18 @@
 ---
 title: "rajan_hwk3_s2"
+subtitle: "Research Methods, Spring 2025"
+execute:
+  before: 
+    - bash /path/to/update-tlmgr-latest.sh
 format:
   pdf:
     output-file: "rajan_hwk3_2"
     output-ext:  "pdf"
-    header-includes:
-      - \usepackage{float}
-      - \floatplacement{table}{H}
-date: "2025-02-24"
+--- 
 
----
 ```{r}
 #| include: false
+
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata, fixest, modelsummary, kableExtra )
 
@@ -28,7 +29,7 @@ load("/Users/sushmitarajan/econ470spring2025/Homework3/submission2/results/Hwk3_
 #| label: Proportion of States with a change in their cigarette tax in each 
 print(question1) 
 ```
-
+\newpage
 
 2. Plot on a single graph the average tax (in 2012 dollars) on cigarettes and the average price of a pack of cigarettes from 1970 to 2018.
 ```{r}
@@ -36,9 +37,13 @@ print(question1)
 question2
 
 ```
-
+\newpage
 
 3. Identify the 5 states with the highest increases in cigarette prices (in dollars) over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
+
+The states with the highest increases in cigarette prices are:
+
+`r paste("States with the highest increases in cigarette prices:", paste(top_states$state, collapse = ", "))`
 ```{r}
 #| echo: false
 
@@ -68,8 +73,12 @@ ggplot(top_states_final, aes(x = Year, y = sales_per_capita, color = state)) +
   ) +
   theme_minimal()
 ```
-
+\newpage
 4. Identify the 5 states with the lowest increases in cigarette prices over the time period. Plot the average number of packs sold per capita for those states from 1970 to 2018.
+
+The states with the lowest increases in cigarette prices are:
+
+`r(low_states$state, collapse = ", "))`
 ```{r}
 #| echo: false
 
