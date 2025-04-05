@@ -138,25 +138,25 @@ ggplot(high_low_avg, aes(x = Year, y = avg_sales_per_capita, color = group)) +
 
 6. Focusing only on the time period from 1970 to 1990, regress log sales on log prices to estimate the price elasticity of demand over that period. Interpret your results.
 ```{r}
-modelsummary(ols.1, output = "markdown")
+modelsummary(ols.1)
 ```
 
 7. Again limiting to 1970 to 1990, regress log sales on log prices using the total (federal and state) cigarette tax (in dollars) as an instrument for log prices. Interpret your results and compare your estimates to those without an instrument. Are they different? If so, why?
 ```{r}
-modelsummary(ivs.1, output = "markdown")
+modelsummary(ivs.1)
 ```
 
 8. Show the first stage and reduced-form results from the instrument.
 
 First Stage:
 ```{r}
-modelsummary(first_stage.1, output = "markdown")
+modelsummary(first_stage.1)
 
 ```
 
 Reduced Form:
 ```{r}
-modelsummary(reduced.1, output = "markdown")
+modelsummary(reduced.1)
 
 ```
 
@@ -164,24 +164,24 @@ modelsummary(reduced.1, output = "markdown")
 
 OLS Regression:
 ```{r}
-modelsummary(ols.2, output = "markdown")
+modelsummary(ols.2)
 ```
 
 IV Regression:
 ```{r}
-modelsummary(ivs.2, output = "markdown")
+modelsummary(ivs.2)
 ```
 
 
 First Stage:
 ```{r}
-modelsummary(first_stage.2, output = "markdown")
+modelsummary(first_stage.2)
 
 ```
 
 Reduced Form:
 ```{r}
-modelsummary(reduced.2, output = "markdown")
+modelsummary(reduced.2)
 
 ```
 

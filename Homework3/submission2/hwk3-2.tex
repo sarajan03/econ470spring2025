@@ -336,7 +336,7 @@ The states with the lowest increases in cigarette prices are:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(ols}\FloatTok{.1}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(ols}\FloatTok{.1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -352,16 +352,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 5.429 \\
-& (0.030) \\
-ln_price_cpi & -0.809 \\
-& (0.038) \\
-Num.Obs. & 1071 \\
-R2 & 0.294 \\
-R2 Adj. & 0.293 \\
-AIC & -522.8 \\
-BIC & -512.8 \\
-RMSE & 0.19 \\
+(Intercept) & \num{5.429} \\
+& (\num{0.030}) \\
+ln\_price\_cpi & \num{-0.809} \\
+& (\num{0.038}) \\
+Num.Obs. & \num{1071} \\
+R2 & \num{0.294} \\
+R2 Adj. & \num{0.293} \\
+AIC & \num{-522.8} \\
+BIC & \num{-512.8} \\
+RMSE & \num{0.19} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -381,7 +381,7 @@ Std.Errors & IID \\
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(ivs}\FloatTok{.1}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(ivs}\FloatTok{.1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -397,16 +397,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 5.418 \\
-& (0.055) \\
-fit_ln_price_cpi & -0.796 \\
-& (0.071) \\
-Num.Obs. & 1071 \\
-R2 & 0.294 \\
-R2 Adj. & 0.293 \\
-AIC & -522.7 \\
-BIC & -512.7 \\
-RMSE & 0.19 \\
+(Intercept) & \num{5.418} \\
+& (\num{0.055}) \\
+fit\_ln\_price\_cpi & \num{-0.796} \\
+& (\num{0.071}) \\
+Num.Obs. & \num{1071} \\
+R2 & \num{0.294} \\
+R2 Adj. & \num{0.293} \\
+AIC & \num{-522.7} \\
+BIC & \num{-512.7} \\
+RMSE & \num{0.19} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -424,7 +424,7 @@ First Stage:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(first\_stage}\FloatTok{.1}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(first\_stage}\FloatTok{.1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -440,16 +440,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 0.841 \\
-& (0.005) \\
-ln_total_tax & 0.260 \\
-& (0.012) \\
-Num.Obs. & 1071 \\
-R2 & 0.290 \\
-R2 Adj. & 0.289 \\
-AIC & -1375.2 \\
-BIC & -1365.3 \\
-RMSE & 0.13 \\
+(Intercept) & \num{0.841} \\
+& (\num{0.005}) \\
+ln\_total\_tax & \num{0.260} \\
+& (\num{0.012}) \\
+Num.Obs. & \num{1071} \\
+R2 & \num{0.290} \\
+R2 Adj. & \num{0.289} \\
+AIC & \num{-1375.2} \\
+BIC & \num{-1365.3} \\
+RMSE & \num{0.13} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -459,7 +459,7 @@ Reduced Form:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(reduced}\FloatTok{.1}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(reduced}\FloatTok{.1}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -475,16 +475,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 4.749 \\
-& (0.009) \\
-ln_total_tax & -0.207 \\
-& (0.021) \\
-Num.Obs. & 1071 \\
-R2 & 0.082 \\
-R2 Adj. & 0.082 \\
-AIC & -242.0 \\
-BIC & -232.1 \\
-RMSE & 0.22 \\
+(Intercept) & \num{4.749} \\
+& (\num{0.009}) \\
+ln\_total\_tax & \num{-0.207} \\
+& (\num{0.021}) \\
+Num.Obs. & \num{1071} \\
+R2 & \num{0.082} \\
+R2 Adj. & \num{0.082} \\
+AIC & \num{-242.0} \\
+BIC & \num{-232.1} \\
+RMSE & \num{0.22} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -502,7 +502,7 @@ OLS Regression:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(ols}\FloatTok{.2}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(ols}\FloatTok{.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -518,16 +518,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 5.662 \\
-& (0.036) \\
-ln_price_cpi & -0.997 \\
-& (0.025) \\
-Num.Obs. & 1275 \\
-R2 & 0.561 \\
-R2 Adj. & 0.561 \\
-AIC & 516.0 \\
-BIC & 526.3 \\
-RMSE & 0.30 \\
+(Intercept) & \num{5.662} \\
+& (\num{0.036}) \\
+ln\_price\_cpi & \num{-0.997} \\
+& (\num{0.025}) \\
+Num.Obs. & \num{1275} \\
+R2 & \num{0.561} \\
+R2 Adj. & \num{0.561} \\
+AIC & \num{516.0} \\
+BIC & \num{526.3} \\
+RMSE & \num{0.30} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -537,7 +537,7 @@ IV Regression:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(ivs}\FloatTok{.2}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(ivs}\FloatTok{.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -553,16 +553,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 5.882 \\
-& (0.041) \\
-fit_ln_price_cpi & -1.150 \\
-& (0.028) \\
-Num.Obs. & 1275 \\
-R2 & 0.548 \\
-R2 Adj. & 0.548 \\
-AIC & 554.0 \\
-BIC & 564.3 \\
-RMSE & 0.30 \\
+(Intercept) & \num{5.882} \\
+& (\num{0.041}) \\
+fit\_ln\_price\_cpi & \num{-1.150} \\
+& (\num{0.028}) \\
+Num.Obs. & \num{1275} \\
+R2 & \num{0.548} \\
+R2 Adj. & \num{0.548} \\
+AIC & \num{554.0} \\
+BIC & \num{564.3} \\
+RMSE & \num{0.30} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -572,7 +572,7 @@ First Stage:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(first\_stage}\FloatTok{.2}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(first\_stage}\FloatTok{.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -588,16 +588,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 1.316 \\
-& (0.004) \\
-ln_total_tax & 0.514 \\
-& (0.007) \\
-Num.Obs. & 1275 \\
-R2 & 0.812 \\
-R2 Adj. & 0.812 \\
-AIC & -1292.8 \\
-BIC & -1282.5 \\
-RMSE & 0.15 \\
+(Intercept) & \num{1.316} \\
+& (\num{0.004}) \\
+ln\_total\_tax & \num{0.514} \\
+& (\num{0.007}) \\
+Num.Obs. & \num{1275} \\
+R2 & \num{0.812} \\
+R2 Adj. & \num{0.812} \\
+AIC & \num{-1292.8} \\
+BIC & \num{-1282.5} \\
+RMSE & \num{0.15} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
@@ -607,7 +607,7 @@ Reduced Form:
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{modelsummary}\NormalTok{(reduced}\FloatTok{.2}\NormalTok{, }\AttributeTok{output =} \StringTok{"markdown"}\NormalTok{)}
+\FunctionTok{modelsummary}\NormalTok{(reduced}\FloatTok{.2}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -623,16 +623,16 @@ hline{6}={1,2}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
 & (1) \\ \midrule %% TinyTableHeader
-(Intercept) & 4.368 \\
-& (0.008) \\
-ln_total_tax & -0.591 \\
-& (0.013) \\
-Num.Obs. & 1275 \\
-R2 & 0.607 \\
-R2 Adj. & 0.607 \\
-AIC & 376.2 \\
-BIC & 386.5 \\
-RMSE & 0.28 \\
+(Intercept) & \num{4.368} \\
+& (\num{0.008}) \\
+ln\_total\_tax & \num{-0.591} \\
+& (\num{0.013}) \\
+Num.Obs. & \num{1275} \\
+R2 & \num{0.607} \\
+R2 Adj. & \num{0.607} \\
+AIC & \num{376.2} \\
+BIC & \num{386.5} \\
+RMSE & \num{0.28} \\
 Std.Errors & IID \\
 \bottomrule
 \end{tblr}
