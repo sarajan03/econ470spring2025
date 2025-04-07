@@ -1,0 +1,104 @@
+---
+title: "analysis"
+output: html_document
+date: "2025-04-06"
+---
+```{r setup, include=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata)
+
+final_data <- readRDS('/Users/sushmitarajan/econ470spring2025/Homework4/data/output/final_ma_data.rds')
+
+final_data
+```
+Summarize the data
+Remove all SNPs, 800-series plans, and prescription drug only plans (i.e., plans that do not offer Part C benefits). Provide a box and whisker plot showing the distribution of plan counts by county over time. Do you think that the number of plans is sufficient, too few, or too many?
+```{r}
+# Step 1: Filter the data (including removing rows with missing or empty county or year)
+filtered_df <- final_data %>%
+  filter(snp == "No",             # Remove SNPs
+         eghp == "No",             # Remove eghp plans
+         partd == "Yes",           # Keep only plans with Part C benefits
+         !is.na(county),           # Remove rows with missing county values
+         !is.na(year),             # Remove rows with missing year values
+         county != "")             # Remove rows with empty county values
+
+# Step 2: Group by 'county' and 'year' and calculate summary statistics
+plan_stats <- filtered_df %>%
+  group_by(county, year) %>%  # Group by county and year (adjust based on your actual columns)
+  summarise(
+    min = min(plan_count, na.rm = TRUE),
+    q1 = quantile(plan_count, 0.25, na.rm = TRUE),
+    median = median(plan_count, na.rm = TRUE),
+    mean = mean(plan_count, na.rm = TRUE),
+    q3 = quantile(plan_count, 0.75, na.rm = TRUE),
+    max = max(plan_count, na.rm = TRUE),
+    .groups = 'drop'  # Avoid grouping in the final output
+  )
+
+# Step 3: Reshape data for boxplot
+plan_stats_long <- plan_stats %>%
+  pivot_longer(cols = c(min, q1, median, mean, q3, max), 
+               names_to = "statistic", 
+               values_to = "value")
+
+# Step 4: Create a box and whisker plot based on summary statistics
+ggplot(plan_stats_long, aes(x = factor(year), y = value, fill = statistic)) +
+  geom_boxplot() +
+  labs(title = "Box and Whisker Plot of Summary Statistics by Year and County",
+       x = "Year",  # 'year' is on the x-axis
+       y = "Summary Statistics Value") +
+  theme_minimal() +
+  facet_wrap(~ county)  # Faceting by county, if you want separate plots for each county
+
+```
+
+
+Provide bar graphs showing the distribution of star ratings in 2010, 2012, and 2015. How has this distribution changed over time?
+```{r}
+
+```
+
+Plot the average benchmark payment over time from 2010 through 2015. How much has the average benchmark payment risen over the years?
+```{r cars}
+
+```
+
+Plot the average share of Medicare Advantage (relative to all Medicare eligibles) over time from 2010 through 2015. Has Medicare Advantage increased or decreased in popularity? How does this share correlate with benchmark payments?
+```{r cars}
+summary(cars)
+```
+
+Estimate ATEs
+For the rest of the assignment, we’ll use a regression discontinuity design to estimate the average treatment effect from receiving a marginally higher rating. We’ll focus only on 2010.
+```{r cars}
+summary(cars)
+```
+
+Calculate the running variable underlying the star rating. Provide a table showing the number of plans that are rounded up into a 3-star, 3.5-star, 4-star, 4.5-star, and 5-star rating.
+```{r cars}
+summary(cars)
+```
+
+Using the RD estimator with a bandwidth of 0.125, provide an estimate of the effect of receiving a 3-star versus a 2.5 star rating on enrollments. Repeat the exercise to estimate the effects at 3.5 stars, and summarize your results in a table.
+```{r cars}
+summary(cars)
+```
+
+Repeat your results for bandwidhts of 0.1, 0.12, 0.13, 0.14, and 0.15 (again for 3 and 3.5 stars). Show all of the results in a graph. How sensitive are your findings to the choice of bandwidth?
+```{r cars}
+summary(cars)
+```
+
+Examine (graphically) whether contracts appear to manipulate the running variable. In other words, look at the distribution of the running variable before and after the relevent threshold values. What do you find?
+```{r cars}
+summary(cars)
+```
+
+Similar to question 4, examine whether plans just above the threshold values have different characteristics than contracts just below the threshold values. Use HMO and Part D status as your plan characteristics.
+```{r cars}
+summary(cars)
+```
+
+Summarize your findings from 5-9. What is the effect of increasing a star rating on enrollments? Briefly explain your results.
+
