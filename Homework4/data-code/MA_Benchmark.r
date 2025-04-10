@@ -35,10 +35,10 @@ for (y in 2010:2011){
            year=y)
   
   assign(paste0("bench.data.",y),bench.data)
-}
+
 
 ## Years 2012-2014
-for (y in 2012:2014){
+for (y in 2013:2014){
   d=drops[which(drops[,1]==y),2]
   bench.data=read_csv(get(paste0("bench.path.",y)),
                       skip=d,
@@ -75,6 +75,5 @@ bench.data.2015 = bench.data.2015 %>%
          year=2015)
 
 
-benchmark.final=rbind(bench.data.2010, bench.data.2011, bench.data.2012,
-                      bench.data.2013, bench.data.2014, bench.data.2015)
+benchmark.final=rbind(bench.data.2010, bench.data.2011, bench.data.2012, bench.data.2013, bench.data.2014, bench.data.2015)
 write_rds(benchmark.final,"/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_benchmark.rds")

@@ -2,31 +2,60 @@
 
 # Preliminaries -----------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata)
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table,readr)
 
 
 
 # Call individual scripts -------------------------------------------------
 
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Plan_Data.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Plan_Characteristics.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Penetration.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Star_Rating.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Risk_Rebates.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/MA_Benchmark.R")
-source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/FFS_Costs.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Plan_Data.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Plan_Characteristics.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Penetration.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Star_Rating.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/Risk_Rebates.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/MA_Benchmark.R")
+#source("/Users/sushmitarajan/econ470spring2025/Homework4/data-code/FFS_Costs.R")
 
 
 
 # Tidy data ---------------------------------------------------------------
 full.ma.data <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/full_ma_data.rds")
+contract.service.area <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/contract_service_area.rds")
 star.ratings <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/star_ratings.rds")
 ma.penetration.data <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_penetration.rds")
 plan.premiums <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/plan_premiums.rds")
 risk.rebate.final <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/risk_rebate.rds")
 benchmark.final <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_benchmark.rds") %>%
   mutate(ssa=as.double(ssa))
-ffs.costs.final <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ffs_c
+ffs.costs.final <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ffs_costs.rds")
+
+final.data <- full.ma.data %>%
+  inner_join(contract.service.area %>% 
+               select(contractid, fips, year), 
+             by=c("contractid", "fips", "year")) %>%
+  filter(!state %in% c("VI","PR","MP","GU","AS","") &
+           snp == "No" &
+           (planid < 800 | planid >= 900) &
+           !is.na(planid) & !is.na(fips))
+
+final.data <- final.data %>%
+  left_join( star.ratings %>%
+               select(-contract_name, -org_type, -org_marketing), 
+             by=c("contractid", "year")) %>%
+  left_join( ma.penetration.data %>% ungroup() %>% select(-ssa) %>%
+               rename(state_long=state, county_long=county), 
+             by=c("fips", "year"))
+
+# calculate star rating (Part C rating if plan doesn't offer part D, otherwise Part D rating if available)
+final.data <- final.data %>% ungroup() %>%
+  mutate(Star_Rating = 
+           case_when(
+             partd == "No" ~ partc_score,
+             partd == "Yes" & is.na(partcd_score) ~ partc_score,
+             partd == "Yes" & !is.na(partcd_score) ~ partcd_score,
+             TRUE ~ NA_real_
+           ))
+
 
 final.state <- final.data %>% 
   group_by(state) %>% 
@@ -78,6 +107,7 @@ final.data <- final.data %>%
              rebate_partc > 0 | basic_premium == 0 ~ payment_partc/riskscore_partc,
              TRUE ~ NA_real_
            ))
+final.data
 
 # incorporate ffs cost data by ssa
 final.data <- final.data %>%
@@ -91,8 +121,7 @@ final.data <- final.data %>%
     parta_enroll>0 & partb_enroll>0 ~ (parta_reimb/parta_enroll) + (partb_reimb/partb_enroll),
     TRUE ~ NA_real_
   ))
+
 final.data
 # save final dataset
 write_rds(final.data,"/Users/sushmitarajan/econ470spring2025/Homework4/data/output/final_ma_data.rds")
-
-

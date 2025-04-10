@@ -108,7 +108,6 @@ for (y in 2010:2015) {
   
 }
 
-risk.rebate.final=rbind(risk.rebate.2010,risk.rebate.2011,
-                        risk.rebate.2012,risk.rebate.2013,risk.rebate.2014,
+risk.rebate.final=rbind(risk.rebate.2010,risk.rebate.2011, risk.rebate.2012,risk.rebate.2013,risk.rebate.2014,
                         risk.rebate.2015)
 write_rds(risk.rebate.final,"/Users/sushmitarajan/econ470spring2025/Homework4/data/output/risk_rebate.rds")

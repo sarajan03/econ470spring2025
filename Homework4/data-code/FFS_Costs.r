@@ -3,20 +3,20 @@
 ##############################################################################
 
 ## Assign yearly file paths
-# ffs.path.2010=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged10.csv")
-# ffs.path.2011=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged11.csv")
-# ffs.path.2012=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged12.csv")
+ffs.path.2010=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged10.csv")
+ffs.path.2011=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged11.csv")
+ffs.path.2012=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged12.csv")
 ffs.path.2013=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged13.csv")
 ffs.path.2014=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged14.csv")
 ffs.path.2015=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/FFS15.xlsx")
 
-drops=array(dim=c(3,2))
-drops[,1]=c(2013:2015)
-drops[,2]=c(2,2,2)
+drops=array(dim=c(6,2))
+drops[,1]=c(2010:2015)
+drops[,2]=c(7,2,2,2,2,2)
 
 
 ## Years 2010-2014
-for (y in 2013:2014){
+for (y in 2010:2014){
   d=drops[which(drops[,1]==y),2]
   ffs.data=read_csv(get(paste0("ffs.path.",y)),
                     skip=d,

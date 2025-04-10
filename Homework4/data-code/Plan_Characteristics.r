@@ -247,7 +247,7 @@ macd.data.2012 = rbind(macd.data.2012a,macd.data.2012b)
 
 
 
-## Raw 2013 data
+# ## Raw 2013 data
 ma.path.2013a=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ma-plan-characteristics/2013LandscapeSource file MA_AtoM 11212012.csv")
 ma.data.2013a=read_csv(ma.path.2013a,
                        skip=6,
@@ -483,7 +483,7 @@ macd.data.2015b=read_xls(macd.path.2015b,
 macd.data.2015 = rbind(macd.data.2015a,macd.data.2015b)
 
 
-for (y in 2010:2015) {
+for (y in 2013:2015) {
 
   ############ CLEAN MA-Only Data #####################
   ma.data=get(paste0("ma.data.",y))

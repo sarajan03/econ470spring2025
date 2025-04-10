@@ -133,7 +133,7 @@ rating.vars.2012=c("contractid",
                   "ttyt_available")
   
   
-## 2013 Rating variable names
+# ## 2013 Rating variable names
 rating.vars.2013=c("contractid",
                    "org_type",
                    "contract_name",
@@ -266,115 +266,5 @@ rating.vars.2015=c("contractid",
                    
                                       
   
-  
-## 2016 Rating variable names
-rating.vars.2016=c("breastcancer_screen",
-                   "rectalcancer_screen",
-                   "flu_vaccine",
-                   "physical_health",
-                   "mental_health",
-                   "physical_monitor",
-                   "bmi_assess",
-                   "specialneeds_manage",
-                   "older_medication",
-                   "older_function",
-                   "older_pain",
-                   "osteo_manage",
-                   "diabetes_eye",
-                   "diabetes_kidney",
-                   "diabetes_bloodsugar",
-                   "bloodpressure",
-                   "ra_manage",
-                   "falling",
-                   "readmissions",
-                   "nodelays",
-                   "carequickly",
-                   "customer_service",
-                   "overallrating_care",
-                   "overallrating_plan",
-                   "coordination",
-                   "complaints_plan",
-                   "leave_plan",
-                   "access_problems",
-                   "improve",
-                   "appeals_timely",
-                   "appeals_review",
-                   "ttyt_available")
-                   
-                   
-  
-  
-## 2017 Rating variable names
-rating.vars.2017=c("breastcancer_screen",
-                   "rectalcancer_screen",
-                   "flu_vaccine",
-                   "physical_health",
-                   "mental_health",
-                   "physical_monitor",
-                   "bmi_assess",
-                   "specialneeds_manage",
-                   "older_medication",
-                   "older_function",
-                   "older_pain",
-                   "osteo_manage",
-                   "diabetes_eye",
-                   "diabetes_kidney",
-                   "diabetes_bloodsugar",
-                   "bloodpressure",
-                   "ra_manage",
-                   "falling",
-                   "readmissions",
-                   "nodelays",
-                   "carequickly",
-                   "customer_service",
-                   "overallrating_care",
-                   "overallrating_plan",
-                   "coordination",
-                   "complaints_plan",
-                   "leave_plan",
-                   "access_problems",
-                   "improve",
-                   "appeals_timely",
-                   "appeals_review",
-                   "ttyt_available")
-                   
-                   
-  
-  
-## 2018 Rating variable names
-rating.vars.2018=c("breastcancer_screen",
-                   "rectalcancer_screen",
-                   "flu_vaccine",
-                   "physical_health",
-                   "mental_health",
-                   "physical_monitor",
-                   "bmi_assess",
-                   "specialneeds_manage",
-                   "older_medication",
-                   "older_function",
-                   "older_pain",
-                   "osteo_manage",
-                   "diabetes_eye",
-                   "diabetes_kidney",
-                   "diabetes_bloodsugar",
-                   "bloodpressure",
-                   "ra_manage",
-                   "falling",
-                   "bladder",
-                   "medication",
-                   "readmissions",
-                   "nodelays",
-                   "carequickly",
-                   "customer_service",
-                   "overallrating_care",
-                   "overallrating_plan",
-                   "coordination",
-                   "complaints_plan",
-                   "leave_plan",
-                   "access_problems",
-                   "improve",
-                   "appeals_timely",
-                   "appeals_review",
-                   "ttyt_available")
                    
                    

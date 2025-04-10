@@ -228,8 +228,7 @@ star.data.2015 <- star.data.2015a %>%
 
 
 
-star.ratings <- plyr::rbind.fill(star.data.2010, star.data.2011,
-                                 star.data.2012, star.data.2013, star.data.2014, star.data.2015)
+star.ratings <- plyr::rbind.fill( star.data.2010, star.data.2011, star.data.2012, star.data.2013, star.data.2014, star.data.2015)
 star.ratings <- as_tibble(star.ratings)
 star.ratings <- star.ratings %>% 
   mutate(new_contract)

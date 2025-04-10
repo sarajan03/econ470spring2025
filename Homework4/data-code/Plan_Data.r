@@ -80,7 +80,7 @@ for (y in 2010:2015) {
 }
 
 full.ma.data <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_data_2010.rds")
-for (y in 2011:2015) {
+for (y in 2010:2015) {
   full.ma.data <- rbind(full.ma.data,read_rds(paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_data_",y,".rds")))
 }
 
