@@ -14,11 +14,11 @@ Summarize the data
 Remove all SNPs, 800-series plans, and prescription drug only plans (i.e., plans that do not offer Part C benefits). Provide a box and whisker plot showing the distribution of plan counts by county over time. Do you think that the number of plans is sufficient, too few, or too many?
 ```{r}
 
-# Step 1: Filter data for relevant years and valid partc_score
+#Filter data for relevant years and valid partc_score
 final_data_clean <- final_data %>%
   filter(year %in% 2010:2015, !is.na(partc_score))
 
-# Step 2: Exclude unwanted plans
+#Exclude unwanted plans
 # - Remove SNPs
 # - Remove 800-series plans (typically employer/union-only)
 # - Remove standalone drug plans (PDPs)
@@ -29,12 +29,12 @@ final_data_clean <- final_data_clean %>%
     !(partd == "Y" & plan_type == "PDP")
   )
 
-# Step 3: Count number of plans per county per year
+#Count number of plans per county per year
 county_plan_counts <- final_data_clean %>%
   group_by(year, state, county) %>%
   summarise(plan_count = n(), .groups = "drop")
 
-# Step 4: Create a boxplot to show distribution of plan counts over time
+#Create a boxplot to show distribution of plan counts over time
 question1 <- ggplot(county_plan_counts, aes(x = factor(year), y = plan_count)) +
   geom_boxplot(fill = "steelblue", color = "navy") +
   coord_cartesian(ylim = c(0, 70)) +
@@ -54,7 +54,7 @@ question1 <- ggplot(county_plan_counts, aes(x = factor(year), y = plan_count)) +
 Provide bar graphs showing the distribution of star ratings in 2010, 2012, and 2015. How has this distribution changed over time?
 ```{r}
 # Drop NA values before processing
-star_dist <- final.data.clean %>%
+star_dist <- final_data %>%
   filter(year %in% c(2010, 2012, 2015)) %>%
   drop_na(year, Star_Rating) %>%  # Drop rows where year or Star_Rating is NA
   group_by(year, Star_Rating) %>%
@@ -70,21 +70,19 @@ question2 <- ggplot(star_dist, aes(x = as.factor(Star_Rating), y = count, fill =
 # Print the plot
 print(question2)
 
-
-
 ```
 
 Plot the average benchmark payment over time from 2010 through 2015. How much has the average benchmark payment risen over the years?
 ```{r}
 
-# Step 1: Calculate the average benchmark payment
+#Calculate the average benchmark payment
 avg_benchmark <- final_data %>%
   filter(year >= 2010 & year <= 2015) %>%
   group_by(year) %>%
   summarise(average_benchmark = mean(ma_rate, na.rm = TRUE))  
 
-# Step 2: Plot the average benchmark payment over time (2010-2015)
-question2 <-ggplot(avg_benchmark, aes(x = year, y = average_benchmark)) +
+#Plot the average benchmark payment over time (2010-2015)
+question3 <-ggplot(avg_benchmark, aes(x = year, y = average_benchmark)) +
   geom_line(color = "steelblue", size = 1) +   
   geom_point(color = "navy", size = 3) +   
   labs(title = "Average Benchmark Payment Over Time (2010-2015)",
@@ -101,19 +99,19 @@ print(question3)
 
 Plot the average share of Medicare Advantage (relative to all Medicare eligibles) over time from 2010 through 2015. Has Medicare Advantage increased or decreased in popularity? How does this share correlate with benchmark payments?
 ```{r}
-# Step 1: Calculate the Share of Medicare Advantage Enrollment relative to Total Medicare Eligibles
+#Calculate the Share of Medicare Advantage Enrollment relative to Total Medicare Eligibles
 medicare_share <- final_data %>%
   filter(year >= 2010 & year <= 2015) %>%
   filter(avg_eligibles > 0, avg_enrolled >= 0) %>%
   group_by(year) %>%
   mutate(ma_share = avg_enrolled / avg_eligibles)  # Share of Medicare Advantage
 
-# Step 2: Calculate the Average Share per Year
+#Calculate the Average Share per Year
 avg_share_per_year <- medicare_share %>%
   group_by(year) %>%
   summarise(average_ma_share = mean(ma_share, na.rm = TRUE))  # Average share for each year
 
-# Step 3: Plot the Trend of Medicare Advantage Share Over Time (2010-2015)
+#Plot the Trend of Medicare Advantage Share Over Time (2010-2015)
 question4<-ggplot(avg_share_per_year, aes(x = year, y = average_ma_share)) +
   geom_line(color = "steelblue", size = 1) +    # Line plot to show the trend
   geom_point(color = "navy", size = 3) +    
@@ -127,9 +125,15 @@ question4<-ggplot(avg_share_per_year, aes(x = year, y = average_ma_share)) +
 question4
 
 
-# Step 4: Check the Correlation Between the Share of Medicare Advantage and Benchmark Payments (mean_risk)
-correlation_data <- medicare_share %>%
-  group_by(year) %>_
+# Step 4: Check the Correlation Between the Share of Medicare Advantage and Benchmark Payments
+# Correlation between Medicare Advantage Share and Benchmark Payments
+medicare_share_with_benchmark <- medicare_share %>%
+  inner_join(avg_benchmark, by = "year")
+correlation <- cor(medicare_share_with_benchmark$ma_share,
+                   medicare_share_with_benchmark$average_benchmark,
+                   use = "complete.obs")
+correlation
+
 
 ```
 
@@ -138,10 +142,11 @@ For the rest of the assignment, we’ll use a regression discontinuity design to
 
 Calculate the running variable underlying the star rating. Provide a table showing the number of plans that are rounded up into a 3-star, 3.5-star, 4-star, 4.5-star, and 5-star rating.
 ```{r}
-data_2010 <- final_data %>% 
-  filter(year == 2010)  # Filter for year 2010
+data_2010 <- final_data %>%
+             filter(!is.na(avg_enrollment) & year==2010 & !is.na(partc_score)) %>%
+  distinct(contractid, planid, county, .keep_all = TRUE)
 
-# Step 1: Calculate the raw rating and assign it to a new column
+#Calculate the raw rating and assign it to a new column
 raw_2010 <- data_2010 %>%
   mutate(raw_rating = rowMeans(
     cbind(
@@ -158,7 +163,7 @@ raw_2010 <- data_2010 %>%
     mutate(mkt_share = avg_enrollment/avg_eligibles, 
           HMO=str_detect(plan_type, "HMO"))
 
-# Step 2: Round star ratings based on raw scores and calculate rounded counts
+#Round star ratings based on raw scores and calculate rounded counts
 ratings_2010_summary <- raw_2010 %>%
   filter(Star_Rating %in% c(3, 3.5, 4, 4.5, 5)) %>%  # Focus on specific star ratings
   mutate(
@@ -191,159 +196,214 @@ kable(ratings_2010_summary, caption = "Summary of Rounded Ratings by Star Rating
 
 Using the RD estimator with a bandwidth of 0.125, provide an estimate of the effect of receiving a 3-star versus a 2.5 star rating on enrollments. Repeat the exercise to estimate the effects at 3.5 stars, and summarize your results in a table.
 ```{r}
-# Estimation for the effect of receiving a 3-star versus a 2.5-star rating
-rd_effect_2_5_3 <- lm(mkt_share ~ treatment_indicator + score_diff, 
-                      data = (raw_2010 %>% 
-                              filter(raw_rating >= (2.75 - 0.125), 
-                                     raw_rating <= (2.75 + 0.125), 
-                                     Star_Rating %in% c(2.5, 3.0)) %>%
-                              mutate(treatment_indicator = (Star_Rating == 3.0), 
-                                     score_diff = raw_rating - 2.75)))
+# Load necessary packages
+library(kableExtra)
+library(dplyr)
 
-summary(rd_effect_2_5_3)
+# Estimation for the effect of receiving a 3-star vs 2.5-star rating
+rd25 <- lm(mkt_share ~ treatment + score, 
+           data = raw_2010 %>% 
+             filter(raw_rating >= (2.75 - 0.125), 
+                    raw_rating <= (2.75 + 0.125), 
+                    Star_Rating %in% c(2.5, 3.0)) %>%
+             mutate(treatment = (Star_Rating == 3.0), 
+                    score = raw_rating - 2.75))
 
-# Estimation for the effect of receiving a 3.5-star versus a 3-star rating
-rd_effect_3_3_5 <- lm(mkt_share ~ treatment_indicator + score_diff, 
-                      data = (raw_2010 %>% 
-                              filter(raw_rating >= (3.25 - 0.125), 
-                                     raw_rating <= (3.25 + 0.125), 
-                                     Star_Rating %in% c(3.0, 3.5)) %>%
-                              mutate(treatment_indicator = (Star_Rating == 3.5), 
-                                     score_diff = raw_rating - 3.25)))
+# Estimation for the effect of receiving a 3.5-star vs 3-star rating
+rd30 <- lm(mkt_share ~ treatment + score, 
+           data = raw_2010 %>% 
+             filter(raw_rating >= (3.25 - 0.125), 
+                    raw_rating <= (3.25 + 0.125), 
+                    Star_Rating %in% c(3.0, 3.5)) %>%
+             mutate(treatment = (Star_Rating == 3.5), 
+                    score = raw_rating - 3.25))
 
-summary(rd_effect_3_3_5)
+# Estimation for the effect of receiving a 4.0-star vs 3-star rating
+rd35 <- lm(mkt_share ~ treatment + score, 
+           data = raw_2010 %>% 
+             filter(raw_rating >= (3.75 - 0.125), 
+                    raw_rating <= (3.75 + 0.125), 
+                    Star_Rating %in% c(3.5, 4.0)) %>%
+             mutate(treatment = (Star_Rating == 4.0), 
+                    score = raw_rating - 3.75))
 
-# Creating a table to summarize the results
-# create a table from both 
-### extract tidy results
-tidy_30 <- tidy(rd_effect_2_5_3)
-tidy_35 <- tidy(rd_effect_3_3_5 )
+# Combine the models into a list
+rd <- list(rd25, rd30, rd35)
+names(rd) <- c("2.5–3", "3–3.5", "3.5–4")
 
-rbind(rdeffect)
+# Extract coefficient summaries from each regression model
+coef_df <- bind_rows(lapply(rd, function(model) {
+  coef_summary <- summary(model)$coefficients
+  data.frame(
+    Model = rep(names(model), nrow(coef_summary)),
+    Coefficient = rownames(coef_summary),
+    Estimate = coef_summary[, "Estimate"],
+    Std_Error = coef_summary[, "Std. Error"],
+    t_value = coef_summary[, "t value"],
+    p_value = coef_summary[, "Pr(>|t|)"]
+  )
+}))
 
-### merge both into one table
-table_6 <- full_join(
-  tidy_30 %>% select(term, estimate, std.error) %>% rename(Estimate_3 = estimate, SE_3 = std.error),
-  tidy_35 %>% select(term, estimate, std.error) %>% rename(Estimate_3.5 = estimate, SE_3.5 = std.error),
-  by = "term"
-)
+# Rename the coefficients based on your labels
+coef_df <- coef_df %>%
+  dplyr::mutate(
+    Coefficient = case_when(
+      Coefficient == "treatmentTRUE" ~ "Rounded",
+      Coefficient == "score" ~ "Running Score",
+      TRUE ~ Coefficient
+    )
+  )
 
-### format table
-table_6 %>%
-  mutate(
-    Estimate_3 = sprintf("%.4f", Estimate_3),
-    SE_3 = sprintf("(%.4f)", SE_3),
-    Estimate_3.5 = sprintf("%.4f", Estimate_3.5),
-    SE_3.5 = sprintf("(%.4f)", SE_3.5)
-  ) %>%
-  select(term, Estimate_3, SE_3, Estimate_3.5, SE_3.5) %>%
-  kable(col.names = c("", "3 Star", "", "3.5 Star", ""),
-        caption = "Table 6: RD Estimates by Star Rating",
-        align = "lcccc") %>%
-  kable_styling(full_width = FALSE, position = "left")
-table_6
+# Create a kable table with custom column names
+coef_df %>%
+  kable("latex", caption = "Effect of Star Rating on Enrollment Near Thresholds", 
+        col.names = c("Model", "Variable", "Estimate", "Standard Error", "t-value", "p-value"))
+
 
 ```
 
 Repeat your results for bandwidhts of 0.1, 0.12, 0.13, 0.14, and 0.15 (again for 3 and 3.5 stars). Show all of the results in a graph. How sensitive are your findings to the choice of bandwidth?
-```{r}
+```{r} 
 
+bandwidths <- c(0.10,0.11, 0.12, 0.13, 0.14, 0.15)
 
-# Define new bandwidth values, rating cutoffs, and comparison labels
-bw_values <- c(0.10, 0.12, 0.13, 0.14, 0.15)
-cutoffs_list <- c(2.75, 3.25)
-comparison_labels <- c("3 Stars vs 2.5 Stars", "3.5 Stars vs 3 Stars")
+# Create an empty list
+results <- list()
 
-# Function to execute regression discontinuity analysis
-run_rd_estimate <- function(dataset, cutoff, bandwidth, comparison_label) {
-  lower_limit <- cutoff - bandwidth
-  upper_limit <- cutoff + bandwidth
+# Loop over each bandwidth and estimate the effects for all regressions
+for (b in bandwidths) {
+  df30 <- lm(mkt_share ~ treatment + score, 
+               data = raw_2010 %>%
+                 filter(raw_rating >= (2.75 - b),
+                        raw_rating <= (2.75 + b),
+                        Star_Rating %in% c(2.5, 3.0)) %>%
+                 mutate(treatment = (Star_Rating == 3), 
+                        score = raw_rating - 2.75))  
+  df35 <- lm(mkt_share ~ treatment + score,
+           data = raw_2010 %>%
+             filter(raw_rating >= (3.25 - b),
+                    raw_rating <= (3.25 + b),
+                    Star_Rating %in% c(3.0, 3.5)) %>%
+             mutate(treatment = (Star_Rating == 3.5),
+                    score = raw_rating - 3.25))
+  df40 <- lm(mkt_share ~ treatment + score,
+           data = raw_2010 %>%
+             filter(raw_rating >= (3.75 - b),
+                    raw_rating <= (3.75 + b),
+                    Star_Rating %in% c(3.5, 4.0)) %>%
+             mutate(treatment = (Star_Rating == 4.0),
+                    score = raw_rating - 3.75))
   
-  treatment_group <- ifelse(cutoff == 2.75, 3.0, 3.5)
-  control_group <- ifelse(cutoff == 2.75, 2.5, 3.0)
+  # Extract the coefficients (estimates) and standard errors for the effect from each model
+  df30_estimate <- tidy(df30)$estimate[2]
+  df35_estimate <- tidy(df35)$estimate[2]
+  df40_estimate <- tidy(df40)$estimate[2]
+  df30_se <- tidy(df30)$std.error[2]
+  df35_se <- tidy(df35)$std.error[2]
+  df40_se <- tidy(df40)$std.error[2]
   
-  filtered_data <- dataset %>%
-    filter(raw_rating >= lower_limit, raw_rating <= upper_limit,
-           Star_Rating %in% c(control_group, treatment_group)) %>%
-    mutate(treatment_indicator = Star_Rating == treatment_group,
-           score_diff = raw_rating - cutoff)
-  
-  # Fit the model and extract results
-  model_fit <- lm(mkt_share ~ treatment_indicator + score_diff, data = filtered_data)
-  model_summary <- tidy(model_fit)
-  model_glance <- glance(model_fit)
-  
-  tibble(
-    Rating_Comparison = comparison_label,
-    Bandwidth = bandwidth,
-    Estimated_Effect = model_summary$estimate[model_summary$term == "treatment_indicatorTRUE"],
-    SE_Estimate = model_summary$std.error[model_summary$term == "treatment_indicatorTRUE"],
-    Observations = model_glance$nobs,
-    R_Squared = model_glance$r.squared
-  )
-}
+  # Store the results
+  results[[as.character(b)]] <- tibble(
+    Bandwidth = b,
+    Comparison = c("2.5 to 3 Star", "3 to 3.5 Star", "3.5 to 4 Star"),
+    Estimate = c(df30_estimate, df35_estimate, df40_estimate),
+    StdError = c(df30_se, df35_se, df40_se)
+  )}
 
-# Apply the analysis across all combinations of bandwidths and cutoffs
-result_data <- purrr::map2_dfr(
-  rep(cutoffs_list, each = length(bw_values)),
-  rep(comparison_labels, each = length(bw_values)),
-  ~ {
-    purrr::map_dfr(bw_values, function(bw) {
-      run_rd_estimate(raw_2010, .x, bw, .y)
-    })
-  }
-)
+# Combine all the results into a single dataframe
+results_df <- bind_rows(results)
 
-# Plot the treatment effects based on bandwidth
-effect_plot <- ggplot(result_data, aes(x = Bandwidth, y = Estimated_Effect, color = Rating_Comparison)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = Estimated_Effect - 1.96 * SE_Estimate,
-                    ymax = Estimated_Effect + 1.96 * SE_Estimate), width = 0.02) +
-  labs(
-    title = "Estimated Treatment Effects Across Different Bandwidths",
-    x = "Bandwidth (Range Around Cutoff)",
-    y = "Treatment Effect on Market Share"
-  ) +
-  theme_minimal(base_size = 14) +
-  scale_color_manual(values = c("3 Stars vs 2.5 Stars" = "darkblue", "3.5 Stars vs 3 Stars" = "firebrick"))
+results_df <- results_df %>%
+  mutate(Bandwidth_offset = case_when(
+    Comparison == "3.5 to 4 Star" ~ Bandwidth + 0.002,
+    TRUE ~ Bandwidth
+  ))
 
-# Display the plot
-print(effect_plot)
+
+# Plot the results
+q7 <- ggplot(results_df, aes(x = Bandwidth_offset, y = Estimate, shape = Comparison)) +
+  geom_point(size = 4, color = "steelblue", fill = "steelblue", stroke = 1.5) +
+  geom_errorbar(aes(ymin = Estimate - StdError, ymax = Estimate + StdError),
+                width = 0.001, color = "navy", size = 1) +
+  labs(title = "RD Estimates by Star Ratings and Bandwith ",
+       x = "Bandwidth",
+       y = "Estimated Effect on Market Share",
+       shape = "Comparison Type") +
+  scale_shape_manual(values = c(16, 17, 15), labels = c("2.5 to 3 Star", "3 to 3.5 Star", "3.5 to 4 Star")) +
+  theme_minimal(base_family = "Times") +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(face = "plain", size = 12),
+    legend.text = element_text(face = "plain", size = 10),
+    axis.title = element_text(face = "plain", size = 12),
+    axis.text = element_text(face = "plain", size = 10),
+    plot.title = element_text(face = "plain", size = 14, hjust = 0.5))
+
+q7
 
 ```
 
 Examine (graphically) whether contracts appear to manipulate the running variable. In other words, look at the distribution of the running variable before and after the relevent threshold values. What do you find?
+
 ```{r}
+# Create a density plot for 'raw_rating' with vertical lines for each rounding threshold
+q8 <- ggplot(raw_2010, aes(x = raw_rating)) +
+  geom_density(fill = "grey", alpha = 0.5) +
+  geom_vline(aes(xintercept = 2.75, color = "3.0 Star Threshold"),
+             linetype = "dashed", size = 0.8, show.legend = TRUE) +
+  geom_vline(aes(xintercept = 3.25, color = "3.5 Star Threshold"),
+             linetype = "dashed", size = 0.8, show.legend = TRUE) +
+  scale_color_manual(
+    name = "Rounding Thresholds",
+    values = c("3.0 Star Threshold" = "steelblue", "3.5 Star Threshold" = "navy")
+  ) +
+  labs(
+    title = "Distribution of Raw Ratings with Rounding Thresholds",
+    x = "Raw Rating", y = "Density"
+  ) +
+  theme_minimal(base_family = "Times") +
+  theme(
+    legend.position = "top",
+    legend.title = element_text(face = "plain", size = 12),
+    legend.text = element_text(size = 10)
+  )
 
-# Subset data around each cutoff
-cutoff_3 <- raw_2010 %>% filter(raw_rating >= 2.75 & raw_rating < 3.25)
-cutoff_35 <- raw_2010 %>% filter(raw_rating >= 3.25 & raw_rating < 3.75)
 
-# Plot around 3.0 cutoff
-plot_3 <- ggplot(cutoff_3, aes(x = raw_rating)) +
-  geom_density(fill = "steelblue", alpha = 0.6) +
-  geom_vline(xintercept = 3.0, linetype = "dashed", color = "red") +
-  labs(title = "(a) Around 3.0 Cutoff", x = "Running Variable", y = "Density") +
-  theme_minimal(base_size = 14)
-
-# Plot around 3.5 cutoff
-plot_35 <- ggplot(cutoff_35, aes(x = raw_rating)) +
-  geom_density(fill = "navy", alpha = 0.6) +
-  geom_vline(xintercept = 3.5, linetype = "dashed", color = "red") +
-  labs(title = "(b) Around 3.5 Cutoff", x = "Running Variable", y = "Density") +
-  theme_minimal(base_size = 14)
-
-# Combine the plots side-by-side
-grid.arrange(plot_3, plot_35, ncol = 2, top = "Density of the Running Variable Near RD Thresholds")
+q8
 ```
 
 Similar to question 4, examine whether plans just above the threshold values have different characteristics than contracts just below the threshold values. Use HMO and Part D status as your plan characteristics.
+```{r}
+# Subset the data for plans just above and below the threshold values
+plans_above_below_threshold <- data_2010 %>%
+  filter((Star_Rating >= 2.9 & Star_Rating < 3.1) |
+    (Star_Rating >= 3.4 & Star_Rating < 3.6))
+
+# Summarize plan characteristics for HMO and Part D status
+plan_characteristics <- plans_above_below_threshold %>%
+  group_by(Star_Rating) %>%
+  summarize(avg_HMO = mean(grepl("HMO", plan_type), na.rm = TRUE),
+    avg_part_d = mean(partd == "Yes", na.rm = TRUE),
+    count = n())
+
+plan_characteristics_clean <- plan_characteristics %>%
+  rename(
+    `Star Rating` = Star_Rating,
+    `Percent HMO Plans` = avg_HMO,
+    `Percent with Part D` = avg_part_d,
+    `Number of Plans` = count) %>%
+  mutate(
+    `Percent HMO Plans` = percent(`Percent HMO Plans`, accuracy = 1),
+    `Percent with Part D` = percent(`Percent with Part D`, accuracy = 1))
+
+kable(plan_characteristics_clean, caption = "Plan Characteristics Around Star Rating Thresholds")
+
+```
 
 
 
 Summarize your findings from 5-9. What is the effect of increasing a star rating on enrollments? Briefly explain your results.
 
 
-dir.create("/Users/sushmitarajan/econ470spring2025/Homework3/submission2/results", recursive = TRUE)
-save.image("/Users/sushmitarajan/econ470spring2025/Homework3/submission2/results/Hwk3_workspace.RData")
+dir.create("/Users/sushmitarajan/econ470spring2025/Homework4/submission3/results", recursive = TRUE)
+save.image("/Users/sushmitarajan/econ470spring2025/Homework4/submission3/results/Hwk4_workspace.RData")

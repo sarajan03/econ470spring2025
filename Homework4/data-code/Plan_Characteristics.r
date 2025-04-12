@@ -483,7 +483,7 @@ macd.data.2015b=read_xls(macd.path.2015b,
 macd.data.2015 = rbind(macd.data.2015a,macd.data.2015b)
 
 
-for (y in 2013:2015) {
+for (y in 2010:2015) {
 
   ############ CLEAN MA-Only Data #####################
   ma.data=get(paste0("ma.data.",y))

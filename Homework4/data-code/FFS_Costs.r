@@ -2,6 +2,11 @@
 ## Read in Average Fee-for-Service Costs per County */
 ##############################################################################
 
+ 
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table,readr)
+
+
 ## Assign yearly file paths
 ffs.path.2010=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged10.csv")
 ffs.path.2011=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ffs-costs/aged11.csv")

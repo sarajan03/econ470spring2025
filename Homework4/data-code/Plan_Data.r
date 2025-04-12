@@ -1,5 +1,7 @@
+#########################################################################
+## Read in enrollment data for january of each year
+#########################################################################
 
-# Preliminaries -----------------------------------------------------------
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table, gdata)
 
@@ -25,41 +27,41 @@ for (y in 2010:2015) {
                            parent_org = col_character(),
                            contract_date = col_character()
                          ))
-
+  
   contract.info = contract.info %>%
     group_by(contractid, planid) %>%
     mutate(id_count=row_number())
-    
+  
   contract.info = contract.info %>%
     filter(id_count==1) %>%
     select(-id_count)
-    
-## Enrollments per plan
+  
+  ## Enrollments per plan
   ma.path=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/monthly-ma-and-pdp-enrollment-by-cpsc/CPSC_Enrollment_Info_",y,"_01.csv")
   enroll.info=read_csv(ma.path,
                        skip=1,
                        col_names = c("contractid","planid","ssa","fips","state","county","enrollment"),
                        col_types = cols(
-                       contractid = col_character(),
-                       planid = col_double(),
-                       ssa = col_double(),
-                       fips = col_double(),
-                       state = col_character(),
-                       county = col_character(),
-                       enrollment = col_double()
+                         contractid = col_character(),
+                         planid = col_double(),
+                         ssa = col_double(),
+                         fips = col_double(),
+                         state = col_character(),
+                         county = col_character(),
+                         enrollment = col_double()
                        ),na="*")
-    
-
+  
+  
   ## Merge contract info with enrollment info
   plan.data = contract.info %>%
     left_join(enroll.info, by=c("contractid", "planid")) %>%
     mutate(year=y)
-    
+  
   ## Fill in missing fips codes (by state and county)
   plan.data = plan.data %>%
     group_by(state, county) %>%
     fill(fips)
-
+  
   ## Fill in missing plan characteristics by contract and plan id
   plan.data = plan.data %>%
     group_by(contractid, planid) %>%
@@ -69,7 +71,7 @@ for (y in 2010:2015) {
   plan.data = plan.data %>%
     group_by(contractid) %>%
     fill(org_type,org_name,org_marketing_name,parent_org)
-    
+  
   ## Collapse from monthly data to yearly
   plan.year = plan.data %>%
     group_by(contractid, planid, fips) %>%
@@ -80,9 +82,9 @@ for (y in 2010:2015) {
 }
 
 full.ma.data <- read_rds("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_data_2010.rds")
-for (y in 2010:2015) {
+for (y in 2011:2015) {
   full.ma.data <- rbind(full.ma.data,read_rds(paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/output/ma_data_",y,".rds")))
 }
 
 write_rds(full.ma.data,"/Users/sushmitarajan/econ470spring2025/Homework4/data/output/full_ma_data.rds")
-sapply(paste0("ma_data_", 2010:2015, ".rds"), unlink)
+sapply(paste0("ma_data_", 20010:2015, ".rds"), unlink)

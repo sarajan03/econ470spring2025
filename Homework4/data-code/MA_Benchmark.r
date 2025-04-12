@@ -2,6 +2,11 @@
 ## Read in MA Benchmark Rates (apply to each county) */
 ##############################################################################
 
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table,readr)
+
+
 ## Assign yearly file paths
 bench.path.2010=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ma-benchmarks/ratebook2010/CountyRate2010.csv")
 bench.path.2011=paste0("/Users/sushmitarajan/econ470spring2025/Homework4/data/input/ma-benchmarks/ratebook2011/CountyRate2011.csv")
@@ -35,7 +40,7 @@ for (y in 2010:2011){
            year=y)
   
   assign(paste0("bench.data.",y),bench.data)
-
+}
 
 ## Years 2012-2014
 for (y in 2013:2014){

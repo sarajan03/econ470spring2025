@@ -4,7 +4,7 @@ subtitle: "ECON 470, Spring 2025"
 author: "Sushmita Rajan"
 format:
   pdf:
-    output-file: "rajan_hwk4_s2"
+    output-file: "rajan_hwk4_s3"
     output-ext:  "pdf"
     header-includes:
       - \usepackage{float}
@@ -16,340 +16,137 @@ format:
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, readr, readxl, hrbrthemes, fixest,
                scales, gganimate, gapminder, gifski, png, tufte, plotly, OECD,
-               ggrepel, survey, foreign, devtools, pdftools, kableExtra, modelsummary,
-               kableExtra,broom,gridExtra)
-final_data <- readRDS('/Users/sushmitarajan/econ470spring2025/Homework4/data/output/final_ma_data.rds')
+               ggrepel, survey, foreign, devtools, pdftools, kableExtra,broom,gridExtra)
+load("/Users/sushmitarajan/econ470spring2025/Homework4/submission3/results/Hwk4_workspace.RData") 
 
 ```
 
-Here is a link to my repository: {https://github.com/sarajan03/econ470spring2025/tree/main/Homework4}
-emove all SNPs, 800-series plans, and prescription drug only plans (i.e., plans that do not offer Part C benefits). Provide a box and whisker plot showing the distribution of plan counts by county over time. Do you think that the number of plans is sufficient, too few, or too many?
+[Click here to visit my GitHub repository](https://github.com/sarajan03/econ470spring2025/tree/main/Homework4)
+
+\newpage 
+## 1.Remove all SNPs, 800-series plans, and prescription drug only plans (i.e., plans that do not offer Part C benefits). Provide a box and whisker plot showing the distribution of plan counts by county over time. Do you think that the number of plans is sufficient, too few, or too many?
 ```{r}
-
-# Step 1: Filter data for relevant years and valid partc_score
-final_data_clean <- final_data %>%
-  filter(year %in% 2010:2015, !is.na(partc_score))
-
-# Step 2: Exclude unwanted plans
-# - Remove SNPs
-# - Remove 800-series plans (typically employer/union-only)
-# - Remove standalone drug plans (PDPs)
-final_data_clean <- final_data_clean %>%
-  filter(
-    snp == "No",
-    !(planid >= 800 & planid < 900),
-    !(partd == "Y" & plan_type == "PDP")
-  )
-
-# Step 3: Count number of plans per county per year
-county_plan_counts <- final_data_clean %>%
-  group_by(year, state, county) %>%
-  summarise(plan_count = n(), .groups = "drop")
-
-# Step 4: Create a boxplot to show distribution of plan counts over time
-question1 <- ggplot(county_plan_counts, aes(x = factor(year), y = plan_count)) +
-  geom_boxplot(fill = "steelblue", color = "navy") +
-  coord_cartesian(ylim = c(0, 70)) +
-  labs(
-    title = "Distribution of Medicare Plan Counts by County (2010–2015)",
-    x = "Year",
-    y = "Number of Plans per County"
-  ) +
-  theme_minimal()
-
-# Step 5: Display the plot
-  print(question1)
+#| echo: false
+#| label: plan-counts
+#| fig-cap: "Distribution of Plan Counts by County Over Time"
+print(question1)
 
 ```
 
+Figure 1 highlights a notable shift in the availability of Medicare Advantage plans across counties from 2010 to 2015. In 2010, beneficiaries had access to a relatively large number of plans—averaging around 13 per county. However, this number declined sharply the following year and then remained relatively stable between 6 and 7 plans per county through 2015. While this represents a significant reduction in plan options, the remaining number still provides a moderate level of choice for most beneficiaries. That said, the data also reveal a wide range in availability, with some counties offering a disproportionately high number of plans. These outliers suggest that the average may not accurately capture typical access, and in many areas, the number of available plans may be low enough to potentially constrain beneficiary choice. In such cases, the median number of plans may serve as a more meaningful measure of access.
+\newpage 
 
-Provide bar graphs showing the distribution of star ratings in 2010, 2012, and 2015. How has this distribution changed over time?
+## 2. Provide bar graphs showing the distribution of star ratings in 2010, 2012, and 2015. How has this distribution changed over time?
 ```{r}
-
-# Drop NA values before processing
-star_dist <- final_data_clean %>%
-  filter(year %in% c(2010, 2012, 2015)) %>%
-  drop_na(year, Star_Rating) %>%  # Drop rows where year or Star_Rating is NA
-  group_by(year, Star_Rating) %>%
-  summarise(count = n(), .groups = "drop")
-
-# Create the plot and separate by year
-question2 <- ggplot(star_dist, aes(x = as.factor(Star_Rating), y = count, fill = as.factor(year))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(x = "Star Rating", y = "Count of Plans", fill = "Year") +
-  theme_minimal() +
-  facet_wrap(~ year, scales = "free_y")  # Separate by year with independent y-axis scales
-
-# Print the plot
+#| echo: false
+#| label: star-dist
+#| fig-cap: "Distribution of Star Ratings by Year"
 print(question2)
 
 ```
+Figure 2 illustrates a clear shift in the quality of Medicare Advantage plans available over time. Between 2010 and 2015, there was a notable decline in the number of lower-rated plans, particularly those rated 2.5 stars, which were the most common in 2010 but saw a sharp reduction by 2012. At the same time, higher-rated plans—especially those with 4.5 stars—became increasingly prevalent. By 2015, the availability of these top-tier plans had grown substantially compared to 2010, suggesting a broader improvement in plan quality and potentially greater access to better-rated options for beneficiaries.
 
-Plot the average benchmark payment over time from 2010 through 2015. How much has the average benchmark payment risen over the years?
+
+\newpage 
+
+## 3.Plot the average benchmark payment over time from 2010 through 2015. How much has the average benchmark payment risen over the years?
 ```{r}
-# Step 1: Calculate the average benchmark payment
-avg_benchmark <- final_data %>%
-  filter(year >= 2010 & year <= 2015) %>%
-  group_by(year) %>%
-  summarise(average_benchmark = mean(ma_rate, na.rm = TRUE))  
-
-# Step 2: Plot the average benchmark payment over time (2010-2015)
-question3 <-ggplot(avg_benchmark, aes(x = year, y = average_benchmark)) +
-  geom_line(color = "steelblue", size = 1) +   
-  geom_point(color = "navy", size = 3) +   
-  labs(title = "Average Benchmark Payment Over Time (2010-2015)",
-       x = "Year",
-       y = "Average Benchmark Payment") +
-coord_cartesian(ylim = c(600, 900)) +                  # Expand y-axis range without clipping
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
-
+#| echo: false
+#| label: bench-plt
+#| fig-cap: "Average Benchmark Payment for MA Plans (2010–2015)"
 print(question3)
 ```
+Benchmark payments generally hovered around $800 throughout the period, with a modest increase of approximately $75 in 2014 before returning to around $800 in 2015.
 
-Plot the average share of Medicare Advantage (relative to all Medicare eligibles) over time from 2010 through 2015. Has Medicare Advantage increased or decreased in popularity? How does this share correlate with benchmark payments?
+
+\newpage 
+## 4. Plot the average share of Medicare Advantage (relative to all Medicare eligibles) over time from 2010 through 2015. Has Medicare Advantage increased or decreased in popularity? How does this share correlate with benchmark payments?
 ```{r}
-# Step 1: Calculate the Share of Medicare Advantage Enrollment relative to Total Medicare Eligibles
-medicare_share <- final_data %>%
-  filter(year >= 2010 & year <= 2015) %>%
-  filter(avg_eligibles > 0, avg_enrolled >= 0) %>%
-  group_by(year) %>%
-  mutate(ma_share = avg_enrolled / avg_eligibles)  # Share of Medicare Advantage
-
-# Step 2: Calculate the Average Share per Year
-avg_share_per_year <- medicare_share %>%
-  group_by(year) %>%
-  summarise(average_ma_share = mean(ma_share, na.rm = TRUE))  # Average share for each year
-
-# Step 3: Plot the Trend of Medicare Advantage Share Over Time (2010-2015)
-question4<-ggplot(avg_share_per_year, aes(x = year, y = average_ma_share)) +
-  geom_line(color = "steelblue", size = 1) +    # Line plot to show the trend
-  geom_point(color = "navy", size = 3) +    
-  labs(title = "Average Share of Medicare Advantage Over Time (2010-2015)",
-       x = "Year",
-       y = "Average Share of Medicare Advantage") +   
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # Rotate x-axis
-  scale_y_continuous(labels = label_percent(scale = 100)) 
-
+#| echo: false
+#| label: avg-share
+#| fig-cap: "Average Medicare Advantage Share of Medicare Eligibles (2010–2015)"
 print(question4)
 
-avg_benchmark <- final_data %>%
-  filter(year >= 2010 & year <= 2015, !is.na(mean_risk)) %>%
-  group_by(year) %>%
-  summarise(average_benchmark = mean(mean_risk, na.rm = TRUE))
-
-# Join avg_share_per_year and avg_benchmark by year
-combined_data <- avg_share_per_year %>%
-  inner_join(avg_benchmark, by = "year")
-
-# Check structure (optional, to confirm numeric types)
-str(combined_data)
-
-# Now calculate correlation
-cor_value <- cor(combined_data$average_ma_share, combined_data$average_benchmark)
-
-# Print nicely
-print(paste("Correlation between MA Share and Benchmark Payments:", round(cor_value, 3)))
-
 ```
 
-Estimate ATEs
-For the rest of the assignment, we’ll use a regression discontinuity design to estimate the average treatment effect from receiving a marginally higher rating. We’ll focus only on 2010.
+Medicare Advantage attainment rates among all Medicare eligibles have demonstrated an increase from 2010 to 2015. In 2010, Medicare Advantage's share of the market was about 20% and rose to nearly 30% by 2015. This increase appears to occur independently of any shifts in benchmark payments, as those have remained stable across the time period. The correlation coefficient between Medicare Advantage share and benchmark payments is `r round(correlation, 2)`. This low number indicates that there is no meaningful correlation, suggesting that the increase in Medicare Advantage participation occurred independently of benchmark payment changes.
 
-Calculate the running variable underlying the star rating. Provide a table showing the number of plans that are rounded up into a 3-star, 3.5-star, 4-star, 4.5-star, and 5-star rating.
+\newpage
+
+# Using 2010 Data:
+## 5.Calculate the running variable underlying the star rating. Provide a table showing the number of plans that are rounded up into a 3-star, 3.5-star, 4-star, 4.5-star, and 5-star rating.
 ```{r}
-data_2010 <- final_data %>% 
-  filter(year == 2010)  # Filter for year 2010
-
-# Step 1: Calculate the raw rating and assign it to a new column
-raw_2010 <- data_2010 %>%
-  mutate(raw_rating = rowMeans(
-    cbind(
-      breastcancer_screen, rectalcancer_screen, cv_diab_cholscreen, glaucoma_test, 
-      monitoring, flu_vaccine, pn_vaccine, physical_health, mental_health, osteo_test, 
-      physical_monitor, primaryaccess, osteo_manage, diab_healthy, bloodpressure, ra_manage, 
-      copd_test, bladder, falling, nodelays, doctor_communicate, carequickly, customer_service, 
-      overallrating_care, overallrating_plan, complaints_plan, appeals_timely, appeals_review, 
-      leave_plan, audit_problems, hold_times, info_accuracy, ttyt_available), 
-    na.rm = TRUE)) %>%
-  select(contractid, planid, fips, avg_enrollment, state, county, raw_rating, partc_score,
-         avg_eligibles, avg_enrolled, premium_partc, risk_ab, Star_Rating,
-         bid, avg_ffscost, ma_rate, plan_type) %>% 
-    mutate(mkt_share = avg_enrollment/avg_eligibles, 
-          HMO=str_detect(plan_type, "HMO"))
-
-# Step 2: Round star ratings based on raw scores and calculate rounded counts
-ratings_2010_summary <- raw_2010 %>%
-  filter(Star_Rating %in% c(3, 3.5, 4, 4.5, 5)) %>%  # Focus on specific star ratings
-  mutate(
-    round_to_3 = as.integer(raw_rating >= 2.75 & raw_rating < 3.00 & Star_Rating == 3),
-    round_to_35 = as.integer(raw_rating >= 3.25 & raw_rating < 3.50 & Star_Rating == 3.5),
-    round_to_4 = as.integer(raw_rating >= 3.75 & raw_rating < 4.00 & Star_Rating == 4),
-    round_to_45 = as.integer(raw_rating >= 4.25 & raw_rating < 4.50 & Star_Rating == 4.5),
-    round_to_5 = as.integer(raw_rating >= 4.75 & raw_rating < 5.00 & Star_Rating == 5)
-  ) %>%
-  group_by(Star_Rating) %>%
-  summarise(
-    count_round_3 = sum(round_to_3),
-    count_round_35 = sum(round_to_35),
-    count_round_4 = sum(round_to_4),
-    count_round_45 = sum(round_to_45),
-    count_round_5 = sum(round_to_5),
-    .groups = "drop"
-  ) %>%
-  mutate(
-    total_rounded_up = count_round_3 + count_round_35 + count_round_4 + count_round_45 + count_round_5
-  ) %>%
-  select(Star_Rating, total_rounded_up)
-
-# Display the results in a table format
+#| echo: false
+#| label: raw-rating
+#| tbl-cap: "Number of Plans by Rounded Star Rating" 
 kable(ratings_2010_summary, caption = "Summary of Rounded Ratings by Star Rating")
 ```
+\newpage 
 
-Using the RD estimator with a bandwidth of 0.125, provide an estimate of the effect of receiving a 3-star versus a 2.5 star rating on enrollments. Repeat the exercise to estimate the effects at 3.5 stars, and summarize your results in a table.
+## 6. Using the RD estimator with a bandwidth of 0.125, provide an estimate of the effect of receiving a 3-star versus a 2.5 star rating on enrollments. Repeat the exercise to estimate the effects at 3.5 stars, and summarize your results in a table.
 ```{r}
-# Estimate effect of receiving 3 stars vs 2.5
-rd_effect_3_vs_2_5 <- lm(mkt_share ~ treat_3 + score_diff, 
-                         data = raw_2010 %>%
-                           filter(raw_rating >= (2.75 - 0.125),
-                                  raw_rating <= (2.75 + 0.125),
-                                  Star_Rating %in% c(2.5, 3.0)) %>%
-                           mutate(
-                             treat_3 = Star_Rating == 3.0,
-                             score_diff = raw_rating - 2.75
-                           ))
+#| echo: false
+#| label: estimates
+#| tbl-cap: "RDD Estimates by Star Rating" 
 
-# Estimate effect of receiving 3.5 stars vs 3
-rd_effect_3_5_vs_3 <- lm(mkt_share ~ treat_3_5 + score_diff, 
-                         data = raw_2010 %>%
-                           filter(raw_rating >= (3.25 - 0.125),
-                                  raw_rating <= (3.25 + 0.125),
-                                  Star_Rating %in% c(3.0, 3.5)) %>%
-                           mutate(
-                             treat_3_5 = Star_Rating == 3.5,
-                             score_diff = raw_rating - 3.25
-                           ))
 
-# Extract and rename tidy outputs
-tidy_3 <- tidy(rd_effect_3_vs_2_5) %>%
-  select(term, estimate, std.error) %>%
-  rename(Estimate_3 = estimate, SE_3 = std.error)
-
-tidy_3_5 <- tidy(rd_effect_3_5_vs_3) %>%
-  select(term, estimate, std.error) %>%
-  rename(Estimate_3_5 = estimate, SE_3_5 = std.error)
-
-# Combine and format table
-results_table <- full_join(tidy_3, tidy_3_5, by = "term") %>%
-  mutate(
-    Estimate_3 = sprintf("%.4f", Estimate_3),
-    SE_3 = sprintf("(%.4f)", SE_3),
-    Estimate_3_5 = sprintf("%.4f", Estimate_3_5),
-    SE_3_5 = sprintf("(%.4f)", SE_3_5)
-  ) %>%
-  select(term, Estimate_3, SE_3, Estimate_3_5, SE_3_5)
-
-# Display table
-kable(results_table,
-      col.names = c("Variable", "3 Star", "", "3.5 Star", ""),
-      caption = "Table 6: RD Estimates at 3.0 and 3.5 Star Cutoffs",
-      align = "lcccc")
-```
-
-Repeat your results for bandwidhts of 0.1, 0.12, 0.13, 0.14, and 0.15 (again for 3 and 3.5 stars). Show all of the results in a graph. How sensitive are your findings to the choice of bandwidth?
-```{r}
-
-# Define new bandwidth values, rating cutoffs, and comparison labels
-bw_values <- c(0.10, 0.12, 0.13, 0.14, 0.15)
-cutoffs_list <- c(2.75, 3.25)
-comparison_labels <- c("3 Stars vs 2.5 Stars", "3.5 Stars vs 3 Stars")
-
-# Function to execute regression discontinuity analysis
-run_rd_estimate <- function(dataset, cutoff, bandwidth, comparison_label) {
-  lower_limit <- cutoff - bandwidth
-  upper_limit <- cutoff + bandwidth
-  
-  treatment_group <- ifelse(cutoff == 2.75, 3.0, 3.5)
-  control_group <- ifelse(cutoff == 2.75, 2.5, 3.0)
-  
-  filtered_data <- dataset %>%
-    filter(raw_rating >= lower_limit, raw_rating <= upper_limit,
-           Star_Rating %in% c(control_group, treatment_group)) %>%
-    mutate(treatment_indicator = Star_Rating == treatment_group,
-           score_diff = raw_rating - cutoff)
-  
-  # Fit the model and extract results
-  model_fit <- lm(mkt_share ~ treatment_indicator + score_diff, data = filtered_data)
-  model_summary <- tidy(model_fit)
-  model_glance <- glance(model_fit)
-  
-  tibble(
-    Rating_Comparison = comparison_label,
-    Bandwidth = bandwidth,
-    Estimated_Effect = model_summary$estimate[model_summary$term == "treatment_indicatorTRUE"],
-    SE_Estimate = model_summary$std.error[model_summary$term == "treatment_indicatorTRUE"],
-    Observations = model_glance$nobs,
-    R_Squared = model_glance$r.squared
-  )
-}
-
-# Apply the analysis across all combinations of bandwidths and cutoffs
-result_data <- purrr::map2_dfr(
-  rep(cutoffs_list, each = length(bw_values)),
-  rep(comparison_labels, each = length(bw_values)),
-  ~ {
-    purrr::map_dfr(bw_values, function(bw) {
-      run_rd_estimate(raw_2010, .x, bw, .y)
-    })
-  }
+# Create the data frame with the results
+question_6_results <- data.frame(
+  Variable = c("Rounded", "Running Score"),
+  `2.5–3` = c("0.009 (0.001)", "-0.022 (0.007)"),
+  `3–3.5` = c("-0.003 (0.003)", "0.022 (0.016)"),
+  `3.5–4` = c("-0.006 (0.002)", "0.075 (0.011)"),
+  `Num.Obs.` = c(4039, NA),  # 'NA' to leave blank for Running Score row
+  `R2` = c(0.018, NA)  # 'NA' to leave blank for Running Score row
 )
 
-# Plot the treatment effects based on bandwidth
-effect_plot <- ggplot(result_data, aes(x = Bandwidth, y = Estimated_Effect, color = Rating_Comparison)) +
-  geom_line(linewidth = 1) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = Estimated_Effect - 1.96 * SE_Estimate,
-                    ymax = Estimated_Effect + 1.96 * SE_Estimate), width = 0.02) +
-  labs(
-    title = "Estimated Treatment Effects Across Different Bandwidths",
-    x = "Bandwidth (Range Around Cutoff)",
-    y = "Treatment Effect on Market Share"
-  ) +
-  theme_minimal(base_size = 14) +
-  scale_color_manual(values = c("3 Stars vs 2.5 Stars" = "darkblue", "3.5 Stars vs 3 Stars" = "firebrick"))
-
-# Display the plot
-print(effect_plot)
+# View the table
+question_6_results
 
 ```
-
-Examine (graphically) whether contracts appear to manipulate the running variable. In other words, look at the distribution of the running variable before and after the relevent threshold values. What do you find?
+\newpage 
+## 7. Repeat your results for bandwidhts of 0.1, 0.12, 0.13, 0.14, and 0.15 (again for 3 and 3.5 stars). Show all of the results in a graph. How sensitive are your findings to the choice of bandwidth?
 ```{r}
-
-# Subset data around each cutoff
-cutoff_3 <- raw_2010 %>% filter(raw_rating >= 2.75 & raw_rating < 3.25)
-cutoff_35 <- raw_2010 %>% filter(raw_rating >= 3.25 & raw_rating < 3.75)
-
-# Plot around 3.0 cutoff
-plot_3 <- ggplot(cutoff_3, aes(x = raw_rating)) +
-  geom_density(fill = "steelblue", alpha = 0.6) +
-  geom_vline(xintercept = 3.0, linetype = "dashed", color = "red") +
-  labs(title = "(a) Around 3.0 Cutoff", x = "Running Variable", y = "Density") +
-  theme_minimal(base_size = 14)
-
-# Plot around 3.5 cutoff
-plot_35 <- ggplot(cutoff_35, aes(x = raw_rating)) +
-  geom_density(fill = "navy", alpha = 0.6) +
-  geom_vline(xintercept = 3.5, linetype = "dashed", color = "red") +
-  labs(title = "(b) Around 3.5 Cutoff", x = "Running Variable", y = "Density") +
-  theme_minimal(base_size = 14)
-
-# Combine the plots side-by-side
-grid.arrange(plot_3, plot_35, ncol = 2, top = "Density of the Running Variable Near RD Thresholds")
+#| echo: false
+#| label: bandwiths
+#| fig-cap: "RDD Results Across Bandwidths" 
+print(q7)
 
 ```
+The findings appear robust across different bandwidth selections. At the 2.5 vs. 3-star threshold, the estimated treatment effect remains consistently positive and statistically significant, although its magnitude tends to decline slightly as the bandwidth increases. In contrast, estimates around the 3 vs. 3.5-star cutoff are generally small, near zero, and not statistically significant—except in the case of the 0.10 bandwidth. Overall, this suggests that the RDD results are relatively stable and not highly sensitive to the choice of bandwidth.
+\newpage 
+## 8.Examine (graphically) whether contracts appear to manipulate the running variable. In other words, look at the distribution of the running variable before and after the relevent threshold values. What do you find?
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| label: dist
+#| fig-cap: "Variable Distribution" 
+print(q8)
+```
+The density plots illustrate the distribution of raw plan ratings around the 3.0 and 3.5 cuttoff marks. In the 3.0 star cuttoff a noticeable spike just above the 2.75 cutoff suggests potential score manipulation aimed at pushing plans into the 3-star category. However at the 3.5 cuttoff displays a more continuous and smooth distribution around the 3.25 threshold, with no apparent discontinuity. These patterns indicate that any potential manipulation is more likely concentrated around the lower threshold.
+\newpage 
+## 9.Similar to question 4, examine whether plans just above the threshold values have different characteristics than contracts just below the threshold values. Use HMO and Part D status as your plan characteristics.
+```{r}
+#| echo: false
+#| label: balance
+#| fig-cap: "Plan Characteristics" 
 
-Similar to question 4, examine whether plans just above the threshold values have different characteristics than contracts just below the threshold values. Use HMO and Part D status as your plan characteristics.
-Summarize your findings from 5-9. What is the effect of increasing a star rating on enrollments? Briefly explain your results.
+kable(plan_characteristics_clean, caption = "Plan Characteristics Around Star Rating Thresholds")
+```
+These results suggest a slight difference in HMO status between plans above and below the cutoff, with plans just above the threshold being somewhat less likely to be HMOs. However, the difference in Part D status is minimal, with plans on either side of the threshold showing nearly identical percentages of those offering Part D. These findings suggest that there are small differences in plan characteristics around the star rating cutoffs, especially in terms of HMO status, but these differences are relatively modest. The comparison between plans just above and below the threshold for both the 3.0 and 3.5-star ratings indicates that HMO status is more likely to vary than Part D coverage around these thresholds.
+
+
+\newpage 
+## 10. Summarize your findings from 5-9. What is the effect of increasing a star rating on enrollments? Briefly explain your results.
+The findings from Questions 5 through 9 suggest that an increase in a plan’s star rating can significantly affect enrollment patterns. In particular, the analysis from Question 6 indicates that a plan’s market share increases significantly when its rating moves from 2.5 to 3 stars. However, the impact of a further increase from 3 to 3.5 stars appears minimal and statistically insignificant. This suggests that the 3-star rating serves as a more substantial threshold in terms of market impact.
+
+The robustness of these results across various bandwidths, as shown in Question 7, reinforces the conclusion that the treatment effect at the 3-star cutoff is relatively stable, irrespective of the bandwidth choice. This stability suggests that the observed effects are not highly sensitive to the specific bandwidth used in the analysis.
+
+Further examination of density plots in Question 8 reveals a potential manipulation of ratings just above the 3.0-star cutoff, with a noticeable spike in the distribution of plan ratings, while the distribution near the 3.5-star cutoff remained relatively uniform. This disparity suggests that manipulation may be more likely around the 2.5 to 3-star threshold, likely due to the significant benefits associated with reaching the 3-star rating, in contrast to the minimal advantage gained from a 3 to 3.5-star increase.
+
+Finally, Question 9 highlights that plans just above the 3-star cutoff differ in key characteristics, especially HMO status, which raises concerns about the validity of the regression discontinuity design (RDD) assumption. The observable differences in plan characteristics suggest that plans near the 3-star threshold may not be as similar as RDD assumptions would expect, potentially undermining the reliability of the estimates in this context.
+
+Overall, the evidence suggests that the 3-star rating is a critical policy threshold for Medicare Advantage plans. The significant jump in market share at this level, combined with potential manipulation and characteristic differences among plans, points to the importance of this threshold in shaping the behavior of plans seeking to improve their ratings. These findings imply that policies targeting the 3-star rating could influence both enrollment patterns and the strategies plans use to achieve higher ratings.
+
 
