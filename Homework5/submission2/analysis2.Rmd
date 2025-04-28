@@ -7,30 +7,37 @@ pacman::p_load(tidyverse, ggplot2, dplyr, lubridate, stringr, readxl, data.table
 
 acs_medicaid <- read_tsv('/Users/sushmitarajan/econ470spring2025/Homework5/data/output/acs_medicaid.txt')
 
+acs_medicaid <- acs_medicaid %>%
+  mutate(perc_private = (ins_employer + ins_direct)/adult_pop,
+         perc_public = (ins_medicare + ins_medicaid)/adult_pop,
+         perc_ins = (adult_pop - uninsured)/adult_pop,
+         perc_unins = uninsured/adult_pop,
+         perc_employer = ins_employer/adult_pop,
+         perc_medicaid = ins_medicaid/adult_pop,
+         perc_medicare = ins_medicare/adult_pop,
+         perc_direct = ins_direct/adult_pop) %>%
+  filter(! State %in% c("Puerto Rico", "District of Columbia"))
 ```
 
 1. Plot the share of the adult population with direct purchase health insurance over time.
 
 ```{r}
-# Calculate the share by year
-direct_share_by_year <- acs_medicaid %>%
+# Calculate the mean share by year
+acs_medicaid_summary <- acs_medicaid %>%
   group_by(year) %>%
-  summarise(
-    total_direct = sum(ins_direct, na.rm = TRUE),
-    total_adults = sum(adult_pop, na.rm = TRUE),
-    direct_share = total_direct / total_adults
-  )
+  summarize(mean_perc_direct = mean(perc_direct, na.rm = TRUE))
 
-# Plot
-q1<- ggplot(direct_share_by_year, aes(x = year, y = direct_share)) +
+#Plot
+q1 <- ggplot(acs_medicaid_summary, aes(x = year, y = mean_perc_direct)) +
   geom_line(color = "black", size = 1.2) +
   geom_point(color = "black", size = 2) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
   labs(
     title = "Share of Adult Population with Direct Purchase Health Insurance",
     x = "Year",
-    y = "Direct Purchase Share (%)"
+    y = "Direct Purchase Share"
   ) +
+  geom_vline(xintercept = 2013.5, color = "red") +
   theme_minimal()
 
 q1
@@ -50,17 +57,14 @@ q1
 3. Plot the share of the adult population with Medicaid over time.
 
 ```{r}
-# Summarize by year: total Medicaid-insured and adult population
+# # Summarize by year: total Medicaid-insured and adult population
 medicaid_share_by_year <- acs_medicaid %>%
   group_by(year) %>%
-  summarise(
-    total_medicaid = sum(ins_medicaid, na.rm = TRUE),
-    total_adults = sum(adult_pop, na.rm = TRUE),
-    medicaid_share = total_medicaid / total_adults
-  )
+  summarize(mean_perc_medicaid = mean(perc_medicaid, na.rm = TRUE))
+
 
 # Plot the Medicaid share over time
-q3 <- ggplot(medicaid_share_by_year, aes(x = year, y = medicaid_share)) +
+q3 <- ggplot(medicaid_share_by_year, aes(x = year, y = mean_perc_medicaid )) +
   geom_line(color = "black", size = 1.2) +
   geom_point(color = "black", size = 2) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
@@ -69,7 +73,8 @@ q3 <- ggplot(medicaid_share_by_year, aes(x = year, y = medicaid_share)) +
     x = "Year",
     y = "Medicaid Coverage Share (%)"
   ) +
-  theme_minimal()
+  geom_vline(xintercept = 2013.5, color = "red")+
+   theme_minimal()
 
 q3
 
@@ -94,14 +99,12 @@ medicaid_grouped <- medicaid_filtered %>%
 uninsured_share_by_group <- medicaid_grouped %>%
   group_by(year, expanded_2014) %>%
   summarise(
-    total_uninsured = sum(uninsured, na.rm = TRUE),
-    total_adults = sum(adult_pop, na.rm = TRUE),
-    uninsured_share = total_uninsured / total_adults,
+    mean_perc_unins = mean(perc_unins, na.rm = TRUE),
     .groups = "drop"
   )
 
 # Plot with custom colors (not gray for "Not Expanded")
-q4 <- ggplot(uninsured_share_by_group, aes(x = year, y = uninsured_share, 
+q4 <- ggplot(uninsured_share_by_group, aes(x = year, y = mean_perc_unins, 
                                             color = expanded_2014, 
                                             linetype = expanded_2014)) +
   geom_line(size = 1.2) +
@@ -110,11 +113,15 @@ q4 <- ggplot(uninsured_share_by_group, aes(x = year, y = uninsured_share,
     values = c("Expanded in 2014" = "black", "Not Expanded" = "black"),
     guide = "none"  # hides redundant color legend
   ) +
+  labs(
+    title = "Share of Uninsured over Time",
+    x = "Year",
+    y = "Uninsured (%)") + 
   scale_linetype_manual(
-    values = c("Expanded in 2014" = "solid", "Not Expanded" = "dotted"),
-    name = "Medicaid Expansion"
-  ) +
+    values = c("Expanded in 2014" = "dotted", "Not Expanded" = "solid"),
+    name = "Medicaid Expansion") +
   scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+  geom_vline(xintercept = 2013.5, color = "red")+
   theme_minimal()
 
 q4
@@ -127,199 +134,103 @@ q4
 
 # Filter for just 2012 and 2015 and exclude post-2014 expanders
 dd_data <- acs_medicaid %>%
-  filter(year %in% c(2012, 2015)) %>%
   filter(is.na(expand_year) | expand_year <= 2014) %>%
-  mutate(
-    expanded_2014 = if_else(expand_year == 2014, "Expanded", "Not Expanded")
+  filter(year %in% c(2012, 2015)) %>%
+  group_by(expand_ever, year) %>%
+  summarize(uninsured=mean(perc_unins)
   )
 
 # Calculate average uninsured percent for each group
-dd_table <- dd_data %>%
-  group_by(expanded_2014, year) %>%
-  summarise(
-    uninsured_rate = sum(uninsured, na.rm = TRUE) / sum(adult_pop, na.rm = TRUE),
-    .groups = "drop"
+dd_table <- pivot_wider(dd_data, names_from="year", names_prefix="year", values_from="uninsured") %>%
+  ungroup() %>%
+  mutate(expand_ever=case_when(
+    expand_ever==FALSE ~ 'Non-expansion',
+    expand_ever==TRUE ~ 'Expansion')
   ) %>%
-  pivot_wider(names_from = year, values_from = uninsured_rate) %>%
-  mutate(
-    diff = `2015` - `2012`
-  )
+  rename(Group=expand_ever,
+         Pre=year2012,
+         Post=year2015)
 
 # Show DD table
 q5 <- dd_table
 
+q5
+
 ```
 6. Estimate the effect of Medicaid expansion on the uninsurance rate using a standard DD regression estimator, again focusing only on states that expanded in 2014 versus those that never expanded.
 ```{r}
-reg.dat <-acs_medicaid  %>% filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
-  mutate(perc_unins=uninsured/adult_pop,
-         post = (year>=2014), 
-         treat=post*expand_ever)
+reg_data <-acs_medicaid  %>% filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
+    mutate(post=(year>=2014),
+    treat=post*expand_ever)
 
-dd.ins.reg <- lm(perc_unins ~ post + expand_ever + post*expand_ever, data=reg.dat)
-
-# Clustered standard errors by 'State'
-cluster_se <- vcovCL(dd.ins.reg, cluster = dd.ins.reg$model$State)
-
-# Get a coeftest with clustered standard errors
-clustered_summary <- coeftest(dd.ins.reg, vcov = cluster_se)
-
-# Convert to a tidy format and omit the intercept
-tidy_summary <- tidy(clustered_summary) %>%
-  filter(term != "(Intercept)") %>%
-  select(term, estimate, std.error, statistic, p.value)
-
-# Display the summary using kable
-q6 <- kable(tidy_summary, digits = 3, caption = "Regression Output with Clustered SE")
+q6 <- lm(perc_unins~post + expand_ever + treat, data=reg_data)
 
 q6
 ```
 7. Include state and year fixed effects in your estimates. Try using the lfe or fixest package to estimate this instead of directly including the fixed effects.
 ```{r}
 
-reg.dat <- acs_medicaid %>% filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
-  mutate(perc_unins=uninsured/adult_pop,
-         post = (year>=2014), 
-         treat=post*expand_ever)
-m.dd <- lm(perc_unins ~ post + expand_ever + treat, data=reg.dat)
-m.twfe <- feols(perc_unins ~ treat | State + year, data=reg.dat)
+q7 <- feols(perc_unins ~ treat | State + year, data=reg_data)
 
-# 1. Clustered standard errors by 'State' for both models
-cluster_se_dd <- vcovCL(m.dd, cluster = m.dd$model$State)
-cluster_se_twfe <- vcovCL(m.twfe, cluster = m.twfe$model$State)
-
-# 2. Get coeftest results with clustered standard errors
-summary_dd <- coeftest(m.dd, vcov = cluster_se_dd)
-summary_twfe <- coeftest(m.twfe, vcov = cluster_se_twfe)
-
-# 3. Tidy the results from both models
-tidy_dd <- tidy(summary_dd) %>% filter(term != "(Intercept)") %>% 
-  mutate(model = "DD")
-
-tidy_twfe <- tidy(summary_twfe) %>% filter(term != "(Intercept)") %>% 
-  mutate(model = "TWFE")
-
-# 4. Combine the results into one data frame
-combined_summary <- bind_rows(tidy_dd, tidy_twfe)
-
-# 5. Reshape the data to get the desired format (term + statistic ~ model)
-long_form <- combined_summary %>%
-  pivot_longer(cols = c(estimate, std.error, statistic, p.value),
-               names_to = "statistic", values_to = "value") %>%
-  select(term, statistic, model, value)
-
-# 6. Pivot the data to a wide format
-final_table <- long_form %>%
-  pivot_wider(names_from = model, values_from = value)
-
-# 7. Display the table with kable
-q7 <- kable(final_table, digits = 3, caption = "Regression Results (DD and TWFE models) with Clustered SE")
+summary(q7)
 
 ```
 8. Repeat the analysis in question 7 but include all states (even those that expanded after 2014). Are your results different? If so, why?
 ```{r}
 # Assuming acs_medicaid dataset is already loaded
 # Adjust the dataset to include all states, even those that expanded after 2014
-reg.dat <- acs_medicaid %>%
-  filter(!is.na(expand_ever)) %>%
-  mutate(perc_unins = uninsured / adult_pop,
-         post = (year >= 2014),
-         treat = post * expand_ever)
-
-# 1. Model using lm() for DD with fixed effects by year and state
-m.dd <- lm(perc_unins ~ post + expand_ever + treat + factor(State) + factor(year), data = reg.dat)
+reg_data_all <- acs_medicaid %>%
+  mutate(treat=case_when(
+    year>=expand_year & !is.na(expand_year) ~ 1,
+    is.na(expand_year) ~ 0,
+    year<expand_year & !is.na(expand_year) ~ 0)
+)
 
 # 2. Model using fixest (or lfe) for TWFE
-m.twfe <- feols(perc_unins ~ treat | State + year, data = reg.dat)
+q8_fe <- feols(perc_unins~treat | State + year, data=reg_data_all)
 
-# 3. Clustered standard errors by 'State' for both models
-cluster_se_dd <- vcovCL(m.dd, cluster = reg.dat$State)
-cluster_se_twfe <- vcovCL(m.twfe, cluster = reg.dat$State)
+q8_fe
 
-# 4. Get coeftest results with clustered standard errors
-summary_dd <- coeftest(m.dd, vcov = cluster_se_dd)
-summary_twfe <- coeftest(m.twfe, vcov = cluster_se_twfe)
-
-# 5. Tidy the results from both models
-tidy_dd <- tidy(summary_dd) %>% 
-  filter(term != "(Intercept)") %>%
-  mutate(model = "DD")
-
-tidy_twfe <- tidy(summary_twfe) %>% 
-  filter(term != "(Intercept)") %>%
-  mutate(model = "TWFE")
-
-# 6. Combine the results into one data frame
-combined_summary <- bind_rows(tidy_dd, tidy_twfe)
-
-# 7. Reshape the data to get the desired format (term + statistic ~ model)
-long_form <- combined_summary %>%
-  pivot_longer(cols = c(estimate, std.error, statistic, p.value),
-               names_to = "statistic", values_to = "value") %>%
-  select(term, statistic, model, value)
-
-# 8. Pivot the data to a wide format
-final_table <- long_form %>%
-  pivot_wider(names_from = model, values_from = value)
-
-# 9. Display the table with kable
-q8<- kable(final_table, digits = 3, caption = "Regression Results (DD and TWFE models) with Clustered SE, Including All States")
 
 ```
 9. Provide an “event study” graph showing the effects of Medicaid expansion in each year. Use the specification that includes state and year fixed effects, limited to states that expanded in 2014 or never expanded.
 ```{r}
-
-reg.dat <-acs_medicaid %>% 
-  filter(expand_year==2014 | is.na(expand_year), !is.na(expand_ever)) %>%
-  mutate(perc_unins=uninsured/adult_pop,
-         post = (year>=2014), 
-         treat=post*expand_ever)
-
-mod.twfe <- feols(perc_unins~i(year, expand_ever, ref=2013) | State + year,
+# Create the fixed effect  on states that expanded in 2014 based on data from above
+mod.twfe1 <- feols(perc_unins~i(year, expand_ever, ref=2013) | State + year,
                   cluster=~State,
-                  data=reg.dat)
-
-q9 <- iplot(mod.twfe, 
+                  data=reg_data)
+#Plot
+q9 <- iplot(mod.twfe1, 
       xlab = 'Time to treatment',
-      main = 'Event study')
+      main = 'Event study with Common Treatment Time')
+
 ```
 
 10. Repeat part 9 but again include states that expanded after 2014. Note: this is tricky…you need to put all states onto “event time” to create this graph.
 ```{r}
 
-# Prepare the dataset to include all states (including those that expanded after 2014)
-reg.dat <- acs_medicaid %>%
-  filter(!is.na(expand_ever)) %>%
-  mutate(
-    perc_unins = uninsured / adult_pop,
-    # Create 'post' variable indicating years after 2014
-    post = (year >= 2014),
-    # Define 'treat' as interaction of 'post' and 'expand_ever'
-    treat = post * expand_ever,
-    # Create event time variable (relative to year of Medicaid expansion)
-    event_time = year - ifelse(expand_ever == 1, expand_year, 2013)  # 2013 is reference year for non-expanders
-  )
-
-# Now, add the reference year back to event_time to get actual calendar years
-reg.dat1 <- reg.dat %>%
-  mutate(time_to_treat = ifelse(expand_ever == TRUE, year-expand_year,-1),
-         time_to_treat = ifeslse(time_to_treat <=-4,-4, time_to_treat))  # Adjust event_time to actual calendar year
+# Adding the reference year back to event_time to get actual calendar years
+reg_data_all <- reg_data_all %>%
+  mutate(time_to_treat=ifelse(expand_ever==TRUE, year-expand_year, -1),
+         time_to_treat=ifelse(time_to_treat<=-4, -4, time_to_treat))
 
 # 1. Estimate the event study model (including all states)
 # Treat 'event_time' as a factor to define the reference category
-mod.twfe <- feols(perc_unins ~ i(factor(event_time), expand_ever) | State + year, 
-                  cluster = ~State, data = reg.dat)
-
+mod.twfe2 <- feols(perc_unins~i(time_to_treat, expand_ever, ref=-1) | State + year,
+                  cluster=~State,
+                  data=reg_data_all)
 # 2. Plot the event study graph with the actual 'calendar_year' on the x-axis
-q10 <- iplot(mod.twfe, 
+q10 <- iplot(mod.twfe2, 
       xlab = 'Year',  # Change x-axis label to 'Year'
       main = 'Event Study with States Expanding After 2014',
       xvar = "calendar_year")  # Set xvar to 'calendar_year' for the x-axis
 
+q10
+
 ```
 
 ```{r}
-dir.create("/Users/sushmitarajan/econ470spring2025/Homework5/submission1/results", recursive = TRUE)
-save.image("/Users/sushmitarajan/econ470spring2025/Homework5/submission1/results/Hwk5_workspace.RData")
+dir.create("/Users/sushmitarajan/econ470spring2025/Homework5/submission2/results", recursive = TRUE)
+save.image("/Users/sushmitarajan/econ470spring2025/Homework5/submission2/results/Hwk5_workspace.RData")
 ```
 
